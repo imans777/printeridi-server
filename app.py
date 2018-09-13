@@ -30,9 +30,11 @@ if __name__ == '__main__':
                           "--kiosk", "--disable-translate",
                           "--start-maximized", "http://0.0.0.0"])
 
-    printer_app.run(host='0.0.0.0', port=80,
-                    debug=True, use_reloader=False, threaded=True)
-
     # Used alongside socket
-    # TODO: add socket
+    from quantum3d import socketio
     print('-> App is now running! <-')
+    socketio.run(printer_app,
+                 host='0.0.0.0',
+                 port=80,
+                 debug=True,
+                 use_reloader=False)
