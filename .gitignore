@@ -1,0 +1,16 @@
+.idea/
+.vscode/
+__pycache__/
+dist/
+build/
+quantum3d.egg-info/
+*.pyc
+backup_print.bc
+backup_print_path.bc
+*.map
+
+#should be ignored
+#.env
+#database.db
+#quantum3d/static/
+#quantum3d/templates/
