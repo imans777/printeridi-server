@@ -6,4 +6,4 @@ from flask import render_template
 @home_bp.route('/<path:path>')
 def client_renderer(path):
     # TODO: should separate client views
-    return render_template('index.html')
+    return render_template('app.html')
