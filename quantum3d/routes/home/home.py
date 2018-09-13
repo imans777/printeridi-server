@@ -1,9 +1,14 @@
-from quantum3d.routes import home_bp
-from flask import render_template
+from quantum3d.routes import home_bp as app
+from flask import render_template, request
+from quantum3d.utility import Utils
 
 
-@home_bp.route('/', defaults={'path': ''})
-@home_bp.route('/<path:path>')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
 def client_renderer(path):
-    # TODO: should separate client views
-    return render_template('app.html')
+    client = Utils.get_client_ip(request)
+    server = Utils.get_server_ip(request)
+    if (client == server):
+        return render_template('app.html')
+    else:
+        return render_template('web.html')
