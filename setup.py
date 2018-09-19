@@ -17,6 +17,9 @@ setup(
         'tests',
     ],
     include_package_data=True,
+    requires=[
+        'tests'
+    ],
     install_requires=[
         'flask',
         'flask-socketio',

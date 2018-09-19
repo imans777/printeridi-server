@@ -7,7 +7,10 @@ from .error_handler import error_handler_with, message
 class PrinterDB:
     def __init__(self):
         import os
-        self.connection_count = int(os.environ.get('DB_CONNECTION_LIMIT')) or 3
+        if os.environ.get('DB_CONNECTION_LIMIT'):
+            self.connection_count = int(os.environ.get('DB_CONNECTION_LIMIT'))
+        else:
+            self.connection_count = 3  # fallback
         self.db = -1
         self.create_connection(os.path.join(
             os.getcwd(),

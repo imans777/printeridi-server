@@ -1,16 +1,14 @@
 
 if __name__ == '__main__':
-    # Load environment variables
-    from dotenv import load_dotenv
-    from pathlib import Path  # python3 only
-    load_dotenv(verbose=True)
-    env_path = Path('..') / '.env'
-    load_dotenv(dotenv_path=str(env_path))
-
-    # Necessary fallback
+    # (TEST FOR NOW) Add root project directory to system paths / put here or in quantum3d/__init__.py?
     import os
-    if os.environ['FLASK_APP'] is None:
-        os.environ['FLASK_APP'] = 'quantum3d'
+    import sys
+    sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+    print('realpath: ', os.path.dirname(os.path.realpath(__file__)))
+    # TODO: Maybe also need to set PYTHONPATH!
+    # TODO: SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D)
+    # TODO: SHOULD HAVE AN EXCEPTION CLASS!
+    # TODO: what if we implement Socket, but still use app.run?! will sockets work in that way?
 
     # Main app
     from quantum3d import printer_app
