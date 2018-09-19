@@ -11,7 +11,6 @@ import subprocess
 import codecs
 import os
 #import psutil
-import sqlite3
 import configparser
 
 
@@ -31,6 +30,7 @@ log.addHandler(stream)
 
 BASE_PATH = '/media/pi'  # '/media/pi'   '''** change for test in laptop or raspberry pi   '''
 
+from quantum3d.db import db
 
 class Machine:
     def __init__(self, machine_port='/dev/ttyUSB0', machine_baudrate=250000):
@@ -51,54 +51,24 @@ class Machine:
         self.printing_file = None  # When printing started, it will set to filename
         self.pin = None  # When locked, it will be set, when unlocked, it is None
 
-        db = sqlite3.connect(
-            'database.db', check_same_thread=False, isolation_level=None)
-        self.dbcursor = db.cursor()
-        # settings_keys = ('bedleveling_X1', 'bedleveling_X2',
-        #                  'bedleveling_Y1', 'bedleveling_Y2',
-        #                  'traveling_feedrate', 'bedleveling_Z_ofsset',
-        #                  'bedleveling_Z_move_feedrate', 'hibernate_Z_offset',
-        #                  'hibernate_Z_move_feedrate', 'pause_Z_offset',
-        #                  'pause_Z_move_feedrate', 'printing_buffer',
-        #                  'ABS', 'pin')
-
-        self.dbcursor.execute('''CREATE TABLE IF NOT EXISTS Settings
-        (bedleveling_X1 real, bedleveling_X2 real,
-        bedleveling_Y1 real, bedleveling_Y2 real,
-        traveling_feedrate real, bedleveling_Z_ofsset real,
-        bedleveling_Z_move_feedrate real, hibernate_Z_offset real,
-        hibernate_Z_move_feedrate real, pause_Z_offset real,
-        pause_Z_move_feedrate real, printing_buffer real,
-        ABS TEXT, pin real)''')
-
-        self.dbcursor.execute('SELECT * FROM Settings LIMIT 1')
-        settings = self.dbcursor.fetchone()
-        if settings is None:
-            settings = (50, 180, 50, 180, 3000, 10, 1500,
-                        5, 1500, 10, 1500, 15, "yes", None,)
-            self.dbcursor.execute("""INSERT INTO Settings
-                                  (bedleveling_X1, bedleveling_X2,
-                                  bedleveling_Y1, bedleveling_Y2,
-                                  traveling_feedrate, bedleveling_Z_ofsset,
-                                  bedleveling_Z_move_feedrate, hibernate_Z_offset,
-                                  hibernate_Z_move_feedrate, pause_Z_offset,
-                                  pause_Z_move_feedrate, printing_buffer, ABS, pin)
-                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", settings)
-
-        self.machine_settings = {
-            # manual bed leveling settings
-            'bedleveling_X1': settings[0], 'bedleveling_X2': settings[1], 'bedleveling_Y1': settings[2], 'bedleveling_Y2': settings[3],
-            'traveling_feedrate': settings[4],
-            'bedleveling_Z_ofsset': settings[5], 'bedleveling_Z_move_feedrate': settings[6],
-            # hibernate setting
-            'hibernate_Z_offset': settings[7], 'hibernate_Z_move_feedrate': settings[8],
-            # pause setting
-            'pause_Z_offset': settings[9], 'pause_Z_move_feedrate': settings[10],
-            # printing buffer
-            'printing_buffer': settings[11],
-            # Should the system ask to start previous print after hibernate ("yes") or not ("no")
-            'ABS': settings[12],
-        }
+        try:
+            settings = db.get_settings()
+            self.machine_settings = {
+                # manual bed leveling settings
+                'bedleveling_X1': settings[0], 'bedleveling_X2': settings[1], 'bedleveling_Y1': settings[2], 'bedleveling_Y2': settings[3],
+                'traveling_feedrate': settings[4],
+                'bedleveling_Z_ofsset': settings[5], 'bedleveling_Z_move_feedrate': settings[6],
+                # hibernate setting
+                'hibernate_Z_offset': settings[7], 'hibernate_Z_move_feedrate': settings[8],
+                # pause setting
+                'pause_Z_offset': settings[9], 'pause_Z_move_feedrate': settings[10],
+                # printing buffer
+                'printing_buffer': settings[11],
+                # Should the system ask to start previous print after hibernate ("yes") or not ("no")
+                'ABS': settings[12],
+            }
+        except:
+            print('ERROR -> could not get initial settings. Did you forget to run "initiate.py" first?')
 
         self.time = Time()
         self.Gcode_handler_error_logs = []
@@ -120,46 +90,30 @@ class Machine:
         self.use_ext_board = False
         self.start_machine_connection()
 
+#TODO: move to apis!
     def set_pin(self, pin):
         try:
-            self.dbcursor.execute('UPDATE Settings SET pin = ?', (pin,))
-            print(pin)
+            db.set_pin(pin)
             return True
         except Exception as e:
             print('Error in setting pin:', e)
             return False
 
+#TODO: move to apis!
     def fetch_pin(self):
-        print(self.is_locked)
-        self.dbcursor.execute('SELECT pin FROM Settings LIMIT 1')
-        pin = self.dbcursor.fetchone()[0]
-        if pin is None:
-            return None
-        return int(pin)
+        return db.fetch_pin()
 
+#TODO: move to apis!
     def set_abs(self, status):
-        self.dbcursor.execute("UPDATE Settings SET ABS=?", (status,))
+        db.set_abs(status)
 
+#TODO: move to apis!
     def get_abs(self):
-        self.dbcursor.execute("SELECT ABS FROM Settings LIMIT 1")
-        return self.dbcursor.fetchone()[0]
+        return db.get_abs()
 
+#TODO: move to apis!
     def get_recent_print_status(self):
-        result = []
-        self.dbcursor.execute('SELECT * FROM Prints LIMIT 10')
-        prints = self.dbcursor.fetchall()
-
-        for print_status in prints:
-            status = {
-                'time': print_status[0],
-                'temperature': print_status[1],
-                'file_name': print_status[2],
-                # 'filament_type': print_status[3],
-                # We don't have filament type yet! So we skip this for now!
-                'is_finished': print_status[3],
-            }
-            result.append(status)
-        return result
+        return db.get_last_prints()
 
     def get_bed_temp(self):
         return self.bed_temp
@@ -674,13 +628,9 @@ class Machine:
         self.on_the_print_page = False
         self.printing_file = None
 
-        self.dbcursor.execute('''CREATE TABLE IF NOT EXISTS Prints
-                    (time TEXT, temperature TEXT, file_name TEXT, is_finished TEXT)
-                    ''')
-        print_status = (new_print['time'], new_print['temperature'],
+        print_info = (new_print['time'], new_print['temperature'],
                         new_print['file_name'], new_print['is_finished'],)
-        self.dbcursor.execute(
-            'INSERT INTO Prints VALUES (?, ?, ?, ?)', print_status)
+        db.add_print_info(print_info)
 
     def append_gcode(self, gcode, gcode_return=0):
         """
