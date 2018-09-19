@@ -11,4 +11,5 @@ def client_renderer(path):
     if (client == server):
         return render_template('app.html')
     else:
+        # make sure there's no firewall set up!
         return render_template('web.html')

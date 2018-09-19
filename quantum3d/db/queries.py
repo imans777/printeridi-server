@@ -1,3 +1,8 @@
+
+__author__ = "Iman Sahebi <iman.s_sani@yahoo.com>"
+__license__ = "The MIT License <http://opensource.org/licenses/MIT>"
+__copyright__ = "Copyright (C) 2018 Iman Sahebi - Released under terms of the MIT License"
+
 # Every database related query or calls comes here
 import sqlite3
 from sqlite3 import Error
@@ -7,14 +12,11 @@ from .error_handler import error_handler_with, message
 class PrinterDB:
     def __init__(self):
         import os
-        if os.environ.get('DB_CONNECTION_LIMIT'):
-            self.connection_count = int(os.environ.get('DB_CONNECTION_LIMIT'))
-        else:
-            self.connection_count = 3  # fallback
+        self.connection_count = int(os.environ.get('DB_CONNECTION_LIMIT') or 3)
         self.db = -1
         self.create_connection(os.path.join(
             os.getcwd(),
-            'database.db'
+            '.'.join([os.environ.get('DB_NAME') or 'database', 'db'])
         ))
         if self.db != -1:
             self.db = self.db.cursor()
