@@ -129,7 +129,7 @@ class DBQueryTest(TestCase):
     def tearDown(self):
         # remove test added settings and prints
         db.cursor.execute(''' DELETE FROM Settings WHERE name <> 'default' ''')
-        # db.cursor.execute(''' DELETE FROM Prints ''')
+        db.cursor.execute(''' DELETE FROM Prints ''')
 
     def test_get_settings_1(self):
         s = db.get_settings('default')
