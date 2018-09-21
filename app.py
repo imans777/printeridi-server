@@ -4,7 +4,7 @@ if __name__ == '__main__':
     import os
     import sys
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-    print('realpath: ', os.path.dirname(os.path.realpath(__file__)))
+    # print('realpath: ', os.path.dirname(os.path.realpath(__file__)))
     # TODO: Maybe also need to set PYTHONPATH!
     # TODO: SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D)
     # TODO: SHOULD HAVE AN EXCEPTION CLASS!

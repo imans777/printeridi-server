@@ -10,16 +10,28 @@ from .error_handler import error_handler_with, message
 
 
 class PrinterDB:
-    def __init__(self):
+    def __init__(self, default_initiate=True):
         import os
         self.connection_count = int(os.environ.get('DB_CONNECTION_LIMIT') or 3)
         self.db = -1
+        db_name = os.environ.get('DB_NAME_TEST') if os.environ.get(
+            'ENV_MODE') == 'test' else os.environ.get('DB_NAME') or 'database'
         self.create_connection(os.path.join(
-            os.getcwd(),
-            '.'.join([os.environ.get('DB_NAME') or 'database', 'db'])
+            os.path.dirname(__file__),
+            '.'.join([db_name, 'db'])
         ))
+        self.cursor = -1
         if self.db != -1:
-            self.db = self.db.cursor()
+            self.cursor = self.db.cursor()
+
+        # TODO: better to read from file
+        self.default_settings = ("default", 50, 180, 50, 180, 3000,
+                                 10, 1500, 5, 1500, 10, 1500, 15)
+
+        if default_initiate:
+            self.create_all_tables()
+            self.set_default_settings()
+            print('-> database initialized')
 
     def create_connection(self, db_address):
         self.connection_count -= 1
@@ -40,90 +52,142 @@ class PrinterDB:
             else:
                 print('Maximum db connection limit reached. No database is in use.')
 
+    def create_all_tables(self):
+        self.create_settings_table()
+        self.create_extra_table()
+        self.create_last_prints_table()
+
     @error_handler_with(message)
     def create_settings_table(self):
-        self.db.execute('''
+        self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS Settings
-            (bedleveling_X1 real, bedleveling_X2 real,
+            (name TEXT PRIMARY KEY,
+            bedleveling_X1 real, bedleveling_X2 real,
             bedleveling_Y1 real, bedleveling_Y2 real,
             traveling_feedrate real, bedleveling_Z_ofsset real,
             bedleveling_Z_move_feedrate real, hibernate_Z_offset real,
             hibernate_Z_move_feedrate real, pause_Z_offset real,
-            pause_Z_move_feedrate real, printing_buffer real,
-            ABS TEXT, pin real)
+            pause_Z_move_feedrate real, printing_buffer real)
+        ''')
+
+    @error_handler_with(message)
+    def create_extra_table(self):
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS Extra
+            (id INTEGER PRIMARY KEY CHECK (id = 0),
+            ABS TEXT,
+            pin TEXT)
         ''')
 
     @error_handler_with(message)
     def create_last_prints_table(self):
-        self.db.execute('''
+        # TODO: separate extruder and bed temperature (do it when adding filament_type)
+        self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS Prints
-            (time TEXT, temperature TEXT, file_name TEXT, is_finished TEXT)
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            time TEXT,
+            temperature TEXT,
+            file_name TEXT,
+            is_finished TEXT)
         ''')
 
     @error_handler_with(message)
-    def get_settings(self):
-        self.db.execute('SELECT * FROM Settings LIMIT 1')
-        settings = self.db.fetchone()
+    def set_default_settings(self, force=False):
+        # force=true only affects the 'default' row in settings table!
+        # and it doesn't remove other rows!
+        self.cursor.execute(f"""
+            INSERT {"OR REPLACE" if force else "OR IGNORE"} INTO Settings
+            (name, bedleveling_X1, bedleveling_X2,
+            bedleveling_Y1, bedleveling_Y2,
+            traveling_feedrate, bedleveling_Z_ofsset,
+            bedleveling_Z_move_feedrate, hibernate_Z_offset,
+            hibernate_Z_move_feedrate, pause_Z_offset,
+            pause_Z_move_feedrate, printing_buffer)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, self.default_settings)
+
+        self.cursor.execute(f"""
+            INSERT {"OR REPLACE" if force else "OR IGNORE"} INTO Extra
+            (id, ABS, pin)
+            VALUES (?, ?, ?)
+        """, (0, 'yes', ''))
+
+    @error_handler_with(message)
+    def get_settings(self, name='default'):
+        self.cursor.execute('''SELECT * FROM Settings
+            WHERE name='%s' ''' % (name))
+        settings = self.cursor.fetchone()
         if settings is None:
-            settings = (50, 180, 50, 180, 3000, 10, 1500,
-                        5, 1500, 10, 1500, 15, "yes", None,)
+            # return default settings
+            return self.default_settings
         return settings
 
     @error_handler_with(message)
     def set_settings(self, settings):
-        # TODO: add name to be able to create custom profile for every settings
-        self.db.execute("""
+        self.cursor.execute("""
                     INSERT INTO Settings
-                    (bedleveling_X1, bedleveling_X2,
+                    (name, bedleveling_X1, bedleveling_X2,
                     bedleveling_Y1, bedleveling_Y2,
                     traveling_feedrate, bedleveling_Z_ofsset,
                     bedleveling_Z_move_feedrate, hibernate_Z_offset,
                     hibernate_Z_move_feedrate, pause_Z_offset,
-                    pause_Z_move_feedrate, printing_buffer, ABS, pin)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    pause_Z_move_feedrate, printing_buffer)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, settings)
 
     @error_handler_with(message)
     def set_pin(self, pin):
-        self.db.execute('UDPATE Settings SET pin = ?', (pin,))
+        self.cursor.execute(''' UPDATE Extra SET pin = ? ''', (pin,))
 
     @error_handler_with(message)
-    def fetch_pin(self):
-        self.db.execute('SELECT pin FROM Settings LIMIT 1')
-        pin = self.db.fetchone()[0]
+    def get_pin(self):
+        self.cursor.execute('SELECT pin FROM Extra')
+        pin = self.cursor.fetchone()[0]
         if pin is None:
             return None
-        return int(pin)
+        # NOTE: be careful that this is string, not int!
+        return pin
 
     @error_handler_with(message)
     def set_abs(self, status):
-        self.db.execute('UPDATE Settings SET ABS=?', (status,))
+        self.cursor.execute('UPDATE Extra SET ABS=?', (status,))
 
     @error_handler_with(message)
     def get_abs(self):
-        self.db.execute('SELECT ABS FROM Settings LIMIT 1')
-        return self.db.fetchone()[0]
+        self.cursor.execute('SELECT ABS FROM Extra')
+        return self.cursor.fetchone()[0]
 
     @error_handler_with(message)
-    def get_last_prints(self):
+    def get_last_prints(self, limit=10):
         result = []
-        self.db.execute('SELECT * FROM Prints LIMIT 10')
-        prints = self.db.fetchall()
+        self.cursor.execute(''' SELECT * FROM Prints
+            ORDER BY id DESC LIMIT ?
+        ''', (limit,))
+        prints = self.cursor.fetchall()
         for item in prints:
             info = {
-                'time': item[0],
-                'temperature': item[1],
-                'file_name': item[2],
-                # 'filament_type': item[3],
+                'time': item[1],
+                'temperature': item[2],
+                'file_name': item[3],
+                # 'filament_type': item[4],
                 # We don't have filament type yet! So we skip this for now!
-                'is_finished': item[3],
+                'is_finished': item[4],
             }
             result.append(info)
         return result
 
     @error_handler_with(message)
-    def add_print_info(self, print_info):
-        self.db.execute('''
-            INSERT INTO Prints VALUES
-            (?, ?, ?, ?)        
-        ''', print_info)
+    def add_print_info(self, print_info=None, dict_info=None):
+        if dict_info:
+            print_info = (
+                dict_info['time'],
+                dict_info['temperature'],
+                dict_info['file_name'],
+                dict_info['is_finished']
+            )
+        if print_info:
+            self.cursor.execute('''
+                INSERT INTO Prints
+                (time, temperature, file_name, is_finished)
+                VALUES (?, ?, ?, ?)        
+            ''', print_info)

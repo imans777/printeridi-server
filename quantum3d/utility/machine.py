@@ -68,7 +68,7 @@ class Machine:
                 'ABS': settings[12],
             }
         except:
-            print('ERROR -> could not get initial settings. Did you forget to run "initiate.py" first?')
+            print('ERROR -> could not get initial settings.')
 
         self.time = Time()
         self.Gcode_handler_error_logs = []
@@ -88,6 +88,8 @@ class Machine:
         # self.recent_print_status = self.load_recent_print_status() # is a list of tuples
         self.ext_board = None
         self.use_ext_board = False
+
+        # TODO: if ran in test mode, this should connect to printer simulate
         self.start_machine_connection()
 
 #TODO: move to apis!
@@ -1054,7 +1056,7 @@ class Time:
     def restart(self):
         self.start_time = time.time()
 
-    # return value as milliseconds
+    # return value as milliseconds (SECONDS?!)
     def read(self):
         elapsed_time = time.time() - self.start_time
         return int(elapsed_time)
