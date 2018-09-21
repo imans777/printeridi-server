@@ -3,9 +3,15 @@ from werkzeug.exceptions import HTTPException
 from flask import Response, jsonify
 
 
+@app.errorhandler(403)
+def error_not_authorized(e):
+    print('ERROR (403 - Not Authorized) -> ', e)
+    return Response(status=403)
+
+
 @app.errorhandler(404)
 def error_not_found(e):
-    print('ERROR (404) -> ', e)
+    print('ERROR (404 - Not Found) -> ', e)
     return Response(status=404)
 
 
@@ -14,7 +20,7 @@ def error_internal_server(e):
     code = 500
     if isinstance(e, HTTPException):
         code = e.code
-    print('ERROR (500) -> ', e)
+    print('ERROR (500 - Internal Server) -> ', e)
     return jsonify(error=str(e)), code
 
 

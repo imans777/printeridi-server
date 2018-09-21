@@ -92,31 +92,6 @@ class Machine:
         # TODO: if ran in test mode, this should connect to printer simulate
         self.start_machine_connection()
 
-#TODO: move to apis!
-    def set_pin(self, pin):
-        try:
-            db.set_pin(pin)
-            return True
-        except Exception as e:
-            print('Error in setting pin:', e)
-            return False
-
-#TODO: move to apis!
-    def fetch_pin(self):
-        return db.fetch_pin()
-
-#TODO: move to apis!
-    def set_abs(self, status):
-        db.set_abs(status)
-
-#TODO: move to apis!
-    def get_abs(self):
-        return db.get_abs()
-
-#TODO: move to apis!
-    def get_recent_print_status(self):
-        return db.get_last_prints()
-
     def get_bed_temp(self):
         return self.bed_temp
 

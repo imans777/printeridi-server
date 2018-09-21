@@ -154,13 +154,13 @@ class DBQueryTest(TestCase):
         db.cursor.execute('SELECT * FROM Settings WHERE name="new"')
         self.assertTrue(db.cursor.fetchone())
 
-    @data('1234', '0000', '0022', '9340')
+    @data('1234', '0000', '0022', '9340', 6543)
     def test_set_pin(self, pin):
         db.set_pin(pin)
         db.cursor.execute('SELECT pin FROM Extra')
         p = db.cursor.fetchall()
         self.assertEqual(len(p), 1)
-        self.assertEqual(p[0][0], pin)
+        self.assertEqual(p[0][0], str(pin))
 
     @data('1234', '0000', '0022', '9340')
     def test_get_pin_1(self, pin):
@@ -171,7 +171,7 @@ class DBQueryTest(TestCase):
     def test_get_pin_2(self):
         self.assertFalse(db.get_pin())
 
-    @data("yes", "no")
+    @data(0, 1)
     def test_set_abs(self, abs):
         db.set_abs(abs)
         db.cursor.execute('SELECT ABS FROM Extra')
@@ -179,7 +179,7 @@ class DBQueryTest(TestCase):
         self.assertEqual(len(a), 1)
         self.assertEqual(a[0][0], abs)
 
-    @data("yes", "no")
+    @data(0, 1)
     def test_get_abs(self, abs):
         db.cursor.execute(''' UPDATE Extra SET ABS = ? ''', (abs,))
         a = db.get_abs()
@@ -232,6 +232,7 @@ class DBQueryTest(TestCase):
             ('1111', '2', '3333', '4')
         ''')
         last_prints = db.get_last_prints(3)
+        self.assertEqual(len(last_prints), 3)
         self.assertIn('11', list(map(lambda x: x['time'], last_prints)))
         self.assertIn('111', list(map(lambda x: x['time'], last_prints)))
         self.assertIn('1111', list(map(lambda x: x['time'], last_prints)))

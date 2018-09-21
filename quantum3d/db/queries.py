@@ -75,7 +75,7 @@ class PrinterDB:
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS Extra
             (id INTEGER PRIMARY KEY CHECK (id = 0),
-            ABS TEXT,
+            ABS INTEGER,
             pin TEXT)
         ''')
 
@@ -110,7 +110,7 @@ class PrinterDB:
             INSERT {"OR REPLACE" if force else "OR IGNORE"} INTO Extra
             (id, ABS, pin)
             VALUES (?, ?, ?)
-        """, (0, 'yes', ''))
+        """, (0, 1, ''))
 
     @error_handler_with(message)
     def get_settings(self, name='default'):
@@ -137,7 +137,7 @@ class PrinterDB:
 
     @error_handler_with(message)
     def set_pin(self, pin):
-        self.cursor.execute(''' UPDATE Extra SET pin = ? ''', (pin,))
+        self.cursor.execute(''' UPDATE Extra SET pin = ? ''', (str(pin),))
 
     @error_handler_with(message)
     def get_pin(self):
