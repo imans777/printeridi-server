@@ -7,30 +7,15 @@ company = Persia3DPrinter (http://persia3dprinter.ir/)
 import serial
 import time
 import threading
-import subprocess
 import codecs
 import os
-#import psutil
-import configparser
 
-
-import logging
-LOG_LEVEL = logging.DEBUG
-LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
-from colorlog import ColoredFormatter
-logging.root.setLevel(LOG_LEVEL)
-formatter = ColoredFormatter(LOGFORMAT)
-stream = logging.StreamHandler()
-stream.setLevel(LOG_LEVEL)
-stream.setFormatter(formatter)
-log = logging.getLogger('pythonConfig')
-log.setLevel(LOG_LEVEL)
-log.addHandler(stream)
-
-
-BASE_PATH = '/media/pi'  # '/media/pi'   '''** change for test in laptop or raspberry pi   '''
-
+from .print_time import Time
+from .extended_board import ExtendedBoard
 from quantum3d.db import db
+
+BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
+
 
 class Machine:
     def __init__(self, machine_port='/dev/ttyUSB0', machine_baudrate=250000):
@@ -55,17 +40,16 @@ class Machine:
             settings = db.get_settings()
             self.machine_settings = {
                 # manual bed leveling settings
-                'bedleveling_X1': settings[0], 'bedleveling_X2': settings[1], 'bedleveling_Y1': settings[2], 'bedleveling_Y2': settings[3],
-                'traveling_feedrate': settings[4],
-                'bedleveling_Z_ofsset': settings[5], 'bedleveling_Z_move_feedrate': settings[6],
+                'bedleveling_X1': settings[1], 'bedleveling_X2': settings[2],
+                'bedleveling_Y1': settings[3], 'bedleveling_Y2': settings[4],
+                'traveling_feedrate': settings[5],
+                'bedleveling_Z_ofsset': settings[6], 'bedleveling_Z_move_feedrate': settings[7],
                 # hibernate setting
-                'hibernate_Z_offset': settings[7], 'hibernate_Z_move_feedrate': settings[8],
+                'hibernate_Z_offset': settings[8], 'hibernate_Z_move_feedrate': settings[9],
                 # pause setting
-                'pause_Z_offset': settings[9], 'pause_Z_move_feedrate': settings[10],
+                'pause_Z_offset': settings[10], 'pause_Z_move_feedrate': settings[11],
                 # printing buffer
-                'printing_buffer': settings[11],
-                # Should the system ask to start previous print after hibernate ("yes") or not ("no")
-                'ABS': settings[12],
+                'printing_buffer': settings[12],
             }
         except:
             print('ERROR -> could not get initial settings.')
@@ -89,7 +73,7 @@ class Machine:
         self.ext_board = None
         self.use_ext_board = False
 
-        # TODO: if ran in test mode, this should connect to printer simulate
+        # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
     def get_bed_temp(self):
@@ -152,15 +136,15 @@ class Machine:
                         if self.ext_board.check_filament_status() == False:
                             self.__pause_flag = True
                             self.__filament_pause_flag = True
-                            print ('!!! paused by filament error !!!')
+                            print('!!! paused by filament error !!!')
 
                     if self.__relay_updated:
                         ''' set relay status '''
                         self.__relay_updated = False
                         self.ext_board.relay_status(
                             self.__relay_state[0], self.__relay_state[1])
-                        print ('relay %d status %r' %
-                               (self.__relay_state[0], self.__relay_state[1]))
+                        print('relay %d status %r' %
+                              (self.__relay_state[0], self.__relay_state[1]))
 
                 if self.__Gcodes_to_run:
                     print('send to machine', ('%s%s' %
@@ -268,9 +252,9 @@ class Machine:
                     else:
                         end = len(line)
                     self.bed_temp['point'] = int(
-                        float(line[line.find('S') + 1: end ]))
+                        float(line[line.find('S') + 1: end]))
                     self.append_gcode('M190 S%f' % (self.bed_temp['point']), 2)
-                    end = None 
+                    end = None
                     break
 
             '''get the extruder temp from the gcode'''
@@ -284,10 +268,10 @@ class Machine:
                     else:
                         end = len(line)
                     self.extruder_temp['point'] = int(
-                        float(line[line.find('S') + 1: end ]))
+                        float(line[line.find('S') + 1: end]))
                     self.append_gcode('M109 S%f' %
                                       (self.extruder_temp['point']), 3)
-                    end = None 
+                    end = None
                     break
 
             '''find the layer that had been printed'''
@@ -301,8 +285,8 @@ class Machine:
                         if line_to_go == int(lines[i][8:lines[i].find(',')]):
                             '''get the direct gcode line (the past value was the layer that has been printed)'''
                             line_to_go = i
-                except Exception as e:print('error in find line :',e)
-
+                except Exception as e:
+                    print('error in find line :', e)
 
             '''send the nozzle to the correct position to start printing'''
             self.append_gcode('G91')
@@ -339,7 +323,7 @@ class Machine:
                     backup_print = open('backup_print.bc', 'w')
                     backup_print.write(layer)
                     backup_print.close()
-                
+
                 simplify_layer = lines[x].find('; layer')
                 if simplify_layer == 0:
                     layer = lines[x][8:lines[x].find(',')]
@@ -364,9 +348,9 @@ class Machine:
                     else:
                         end = len(command)
                     self.bed_temp['point'] = int(
-                        float(command[command.find('S') + 1: end ]))
+                        float(command[command.find('S') + 1: end]))
                     self.append_gcode('M190 S%f' % (self.bed_temp['point']), 2)
-                    end = None 
+                    end = None
 
                 elif command.find('M109') == 0:
                     Sfound = command.find('S')
@@ -377,10 +361,10 @@ class Machine:
                     else:
                         end = len(command)
                     self.extruder_temp['point'] = int(
-                        float(command[command.find('S') + 1: end ]))
+                        float(command[command.find('S') + 1: end]))
                     self.append_gcode('M109 S%f' %
                                       (self.extruder_temp['point']), 3)
-                    end = None 
+                    end = None
 
                 elif command.find('M0') == 0:
                     pass
@@ -438,7 +422,7 @@ class Machine:
                     Zresulte = command.find('Z')
 
                     if Zresulte != -1:
-                        
+
                         if command.find(' ', Zresulte) != -1:
                             end = command.find(' ', Zresulte)
                         elif command.find('\n', Zresulte) != -1:
@@ -450,11 +434,12 @@ class Machine:
                         if z_pos_offset == 0 and line_to_go != 0:
                             z_pos_offset = float(command[Zresulte + 1: end])
                         '''get the current z position of file'''
-                        z_pos = float(command[Zresulte + 1: end ])
+                        z_pos = float(command[Zresulte + 1: end])
                         if line_to_go != 0:
                             z_pos = z_pos - z_pos_offset
                         self.__current_Z_position = z_pos
-                        command = command[0: Zresulte + 1] + str(z_pos) + ' ' + command[end + 1:]
+                        command = command[0: Zresulte + 1] + \
+                            str(z_pos) + ' ' + command[end + 1:]
 
                         end = None
 
@@ -462,7 +447,7 @@ class Machine:
                     Xresulte = command.find('X')
 
                     if Xresulte != -1:
-                        
+
                         if command.find(' ', Xresulte) != -1:
                             end = command.find(' ', Xresulte)
                         elif command.find('\n', Xresulte) != -1:
@@ -470,15 +455,15 @@ class Machine:
                         else:
                             end = len(command)
 
-                        X_pos = float(command[Xresulte + 1: end ])
+                        X_pos = float(command[Xresulte + 1: end])
 
                         end = None
-                        
+
                     '''         get Y position            '''
                     Yresulte = command.find('Y')
 
                     if Yresulte != -1:
-                        
+
                         if command.find(' ', Yresulte) != -1:
                             end = command.find(' ', Yresulte)
                         elif command.find('\n', Yresulte) != -1:
@@ -486,10 +471,9 @@ class Machine:
                         else:
                             end = len(command)
 
-                        Y_pos = float(command[Yresulte + 1: end ])
+                        Y_pos = float(command[Yresulte + 1: end])
 
                         end = None
-
 
                     self.append_gcode(command)
 
@@ -499,7 +483,7 @@ class Machine:
                     Zresulte = command.find('Z')
 
                     if Zresulte != -1:
-                        
+
                         if command.find(' ', Zresulte) != -1:
                             end = command.find(' ', Zresulte)
                         elif command.find('\n', Zresulte) != -1:
@@ -511,13 +495,14 @@ class Machine:
                         if z_pos_offset == 0 and line_to_go != 0:
                             z_pos_offset = float(command[Zresulte + 1: end])
                         '''get the current z position of file'''
-                        z_pos = float(command[Zresulte + 1: end ])
+                        z_pos = float(command[Zresulte + 1: end])
                         if line_to_go != 0:
                             z_pos = z_pos - z_pos_offset
                         self.__current_Z_position = z_pos
-                        command = command[0: Zresulte + 1] + str(z_pos) + ' ' + command[end + 1:]
+                        command = command[0: Zresulte + 1] + \
+                            str(z_pos) + ' ' + command[end + 1:]
 
-                        end = None 
+                        end = None
 
                     # '''                find and repalce F in Gcode file        '''
                     # Feedrate_speed = command.find('F')
@@ -542,7 +527,7 @@ class Machine:
 
                 else:
                     self.append_gcode(command)
-                # if not 
+                # if not
                 command = None
 
             self.print_percentage = int(float(x + 1) / float(len(lines)) * 100)
@@ -561,7 +546,7 @@ class Machine:
                         break
 
                 '''  go to the last position and then resume printing  '''
-                self.append_gcode('G1 X%f Y%f'%(X_pos,Y_pos))
+                self.append_gcode('G1 X%f Y%f' % (X_pos, Y_pos))
 
                 self.append_gcode('G91')
                 self.append_gcode('G1 Z-%f F%f' % (self.machine_settings['pause_Z_offset'],
@@ -570,7 +555,7 @@ class Machine:
 
             ''' stop printing '''
             if self.__stop_flag:
-                
+
                 self.__Gcodes_to_run = []
                 self.__Gcodes_return = []
                 break
@@ -606,7 +591,7 @@ class Machine:
         self.printing_file = None
 
         print_info = (new_print['time'], new_print['temperature'],
-                        new_print['file_name'], new_print['is_finished'],)
+                      new_print['file_name'], new_print['is_finished'],)
         db.add_print_info(print_info)
 
     def append_gcode(self, gcode, gcode_return=0):
@@ -627,6 +612,7 @@ class Machine:
         print('Gcodes to Run:', self.__Gcodes_to_run)
 
     ''' Methods to control the printer '''
+
     def Home_machine(self, axis='All'):
         """
 
@@ -787,7 +773,7 @@ class Machine:
             self.ext_board.flush_input_buffer()
             self.ext_board.off_A_flag()
         read_file_gcode_lines_thread.start()
-        print ('started')
+        print('started')
 
     def stop_printing(self):
         self.__stop_flag = True
@@ -836,7 +822,7 @@ class Machine:
             backup_print_path = open('backup_print_path.bc', 'r')
             backup_file_path = backup_print_path.readline()
             backup_line = int(backup_print.readline())
-            print (backup_line)
+            print(backup_line)
             backup_print.close()
             backup_print_path.close()
             return True, [backup_file_path, backup_line]
@@ -849,14 +835,12 @@ class Machine:
             os.remove('backup_print_path.bc')
         except:
             print("file not removed !")
-            
 
     def stop_move_up(self):
         self.append_gcode('G91')
         self.append_gcode('G1 Z%f F%f' % (self.machine_settings['pause_Z_offset'],
-            self.machine_settings['pause_Z_move_feedrate']))
+                                          self.machine_settings['pause_Z_move_feedrate']))
         self.append_gcode('G90')
-
 
     ''' recent activites '''
 
@@ -874,310 +858,3 @@ class Machine:
 
     def update_filament_status(self):
         self.__update_filament = True
-
-
-class Utils():
-    # util function to get client ip address
-
-    is_first_time = 0
-
-    @staticmethod
-    def get_client_ip_django_only(request):
-        return request.META.get('REMOTE_ADDR') or request.META.get('HTTP_X_FORWARDED_FOR', '')
-
-    @staticmethod
-    def get_server_ip_django_only(request):
-        ip = request.get_host().split(':')[0]
-        return '127.0.0.1' if ip == '0.0.0.0' else ip
-
-    @staticmethod
-    def get_client_ip(request):
-        return request.remote_addr
-
-    @staticmethod
-    def get_server_ip(request):
-        '''
-        Only these are possible!
-            'localhost'
-            '127.0.0.1'
-            '192.168.X.X' -> local device ip from that network
-        '''
-        const_local = '127.0.0.1'
-        ip = request.headers.get('Host')
-        return const_local if ip == 'localhost' else ip
-
-    @staticmethod
-    def get_ip_list():
-        # return ['192.168.0.0', '192.168.0.1']
-        time.sleep(1)
-        ips = os.popen('sudo hostname -I').read()
-        return ips.split()
-
-    @staticmethod
-    def wifi_con(un, pw):
-        try:
-            os.popen('nmcli n on')
-            answer = os.popen(
-                'nmcli d wifi connect \"{0}\" password \"{1}\"'.format(un, pw)).read()
-            if answer.find('successfully'):
-                return 'success'
-            else:
-                raise Exception
-        except Exception as e:
-            print('error in connecting to wifi:', e)
-            return 'failure'
-
-    @staticmethod
-    def connect_to_config_file_wifi():
-        try:
-            config = configparser.ConfigParser()
-            config.read('/boot/Q-config.ini')
-            if config.get('wifi', 'ssid') != '':
-                return Utils.wifi_con(config.get('wifi', 'ssid'), config.get('wifi', 'pass'))
-        except Exception as e:
-            print('no config file found!: ', e)
-            return 'no file '
-
-    @staticmethod
-    def wifi_list():
-        try:
-            # is not always wlp2s0. on raspberry: wlan0
-            x = os.popen('sudo iw dev wlan0 scan | grep SSID').read()
-            y = [m.split() for m in x.split('\n')]
-            res = []
-            for item in y[:-2]:
-                w = ''
-                for i in range(1, len(item)):
-                    w += str(item[i])
-                    # if i != len(item) - 1:
-                    #     w += ' '
-                    w += ' ' if i != len(item)-1 else ''
-                if w != '':
-                    res.append(w)
-            return res
-        except Exception as e:
-            print('ERROR in getting wifi list: ', e)
-            return None
-
-    """ directories """
-    @staticmethod
-    def get_connected_usb():
-        """
-        select a usb
-        :return:
-        first is any usb connected or not
-        second the exception or the directories of usb
-        """
-        sub_usb_dir = subprocess.Popen(
-            ['ls', BASE_PATH], stdout=subprocess.PIPE).communicate()[0]
-        sub_usb_dir = sub_usb_dir[:-1]
-        if sub_usb_dir == '':
-            return None
-            # return False,'No usb found.'
-        else:
-            sub_usb_dir = sub_usb_dir.split(b'\n')
-            sub_usb_dir = [x.decode('utf-8') for x in sub_usb_dir]
-            return sub_usb_dir
-
-    @staticmethod
-    def get_usb_files(sub_dir):
-        """
-        :param sub_dir:
-        the name if the usb taken from 'get connected usb '
-        or the sub foldr name
-        :return:
-        all founded files and folders names
-        """
-        sub_dir = BASE_PATH + '/' + sub_dir
-        files = os.listdir(sub_dir)
-        folders, gcodes = [], []
-        for name in files:
-            if name.endswith('.gcode'):
-                gcodes.append(str(name))
-            if os.path.isdir(os.path.join(sub_dir, name)):
-                folders.append(str(name))
-
-        for g in gcodes:
-            folders.append(g)
-        return folders
-
-
-class Extra():
-    def __init__(self):
-        self.homed_axis = []
-
-    def addHomeAxis(self, axis):
-        if axis != 'All' and axis not in self.homed_axis:
-            self.homed_axis.append(axis)
-        elif axis == 'All':
-            self.homed_axis = ['X', 'Y', 'Z']
-
-    def checkHomeAxisAccess(self):
-        if 'X' in self.homed_axis and 'Y' in self.homed_axis and 'Z' in self.homed_axis:
-            return True
-        return False
-
-
-class Time:
-    """
-    Initialize object to start the timer for print 
-    use Time.read() to read the elapsed time from the start time 
-    at the end use Time.stop() to stop the timer and read the hole time elapsed 
-    """
-
-    def __init__(self):
-        self.start_time = time.time()
-
-    def restart(self):
-        self.start_time = time.time()
-
-    # return value as milliseconds (SECONDS?!)
-    def read(self):
-        elapsed_time = time.time() - self.start_time
-        return int(elapsed_time)
-
-    def stop(self):
-        elapsed_time = time.time() - self.start_time
-        self.start_time = None
-        return int(elapsed_time)
-
-
-class RaspberryHardwareInfo:  # new
-    pass
-    # """
-    # thanks to this repository
-    # https://github.com/gavinlyonsrepo/raspberrypi_tempmon.git
-    # """
-    # @staticmethod
-    # def get_cpu_tempfunc():
-    #     """ Return CPU temperature """
-    #     result = 0
-    #     mypath = "/sys/class/thermal/thermal_zone0/temp"
-    #     with open(mypath, 'r') as mytmpfile:
-    #         for line in mytmpfile:
-    #             result = line
-    #
-    #     result = float(result)/1000
-    #     result = round(result, 1)
-    #     return result
-    #
-    # @staticmethod
-    # def get_gpu_tempfunc():
-    #     """ Return GPU temperature as a character string"""
-    #     res = os.popen('/opt/vc/bin/vcgencmd measure_temp').readline()
-    #     return float(res.replace("temp=", ""))
-    #
-    # @staticmethod
-    # def get_cpu_use():
-    #     """ Return CPU usage using psutil"""
-    #     return psutil.cpu_percent()
-    #
-    # @staticmethod
-    # def get_ram_info():
-    #     """ Return RAM usage using psutil """
-    #     return psutil.virtual_memory()[2]
-    #
-    # @staticmethod
-    # def get_swap_info():
-    #     """ Return swap memory  usage using psutil """
-    #     return psutil.swap_memory()[3]
-
-
-class ExtendedBoard:
-    def __init__(self, board_port='/dev/ttyS0', board_baudrate=9600):
-        self.filament_exist = True
-        self.relay1 = False
-        self.relay2 = False
-        self.board_port = board_port
-        self.board_baudrate = board_baudrate
-
-        self.board_serial = serial.Serial(
-            port=self.board_port,
-            baudrate=self.board_baudrate,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS
-        )
-        self.board_serial.close()
-        self.board_serial.open()
-        time.sleep(2)
-        self.board_serial.write(b'S')
-        timeout_time = time.time()
-        check_number = 0
-        while True:
-
-            '''  check for time out time '''
-            if time.time() - timeout_time > 0.2:
-                self.board_serial.write(b'S')
-                timeout_time = time.time()
-                check_number += 1
-
-            if check_number > 3:
-                print ('!!! extended board not found !!!')
-                raise BaseException('!!! no board found !!!')
-
-            if self.board_serial.inWaiting():
-                text = str(self.board_serial.readline())
-                if text.find('ok') != -1:
-                    break
-
-    def check_filament_status(self):
-        # pass
-        """
-        check filament
-        is exist return true
-        not exist return false and the printer most pause
-        if return None it means its in the last situation
-
-
-        """
-        if self.board_serial.inWaiting() > 0:
-            text = str(self.board_serial.readline())
-
-            if text.find('A') != -1:
-                self.filament_exist = False
-                return False
-
-            else:
-                self.filament_exist = True
-                return True
-
-        else:
-            return None
-
-    def relay_status(self, relay_num, status):
-        """
-
-        set the relay on or off 
-        we have 2 relay 
-
-        after sending the data it will wait for  an 'ok' to recive frome board 
-
-
-
-        """
-        if relay_num == 1:
-            if status:
-                self.board_serial.write(b'O')
-            else:
-                self.board_serial.write(b'P')
-
-        elif relay_num == 2:
-            if status:
-                self.board_serial.write(b'W')
-            else:
-                self.board_serial.write(b'E')
-
-        while True:
-            text = str(self.board_serial.readline())
-            if text.find('ok') != -1:
-                return
-
-    def flush_input_buffer(self):
-        self.board_serial.flushInput()
-
-    def off_A_flag(self):
-        self.board_serial.write(b'M')
-
-    def off_B_flag(self):
-        self.board_serial.write(b'N')

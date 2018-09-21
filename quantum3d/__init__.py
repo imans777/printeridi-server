@@ -20,6 +20,21 @@ def env_initiation():
 
 env_initiation()
 
+# coloring the logs
+import logging
+LOG_LEVEL = logging.DEBUG
+LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
+from colorlog import ColoredFormatter
+logging.root.setLevel(LOG_LEVEL)
+formatter = ColoredFormatter(LOGFORMAT)
+stream = logging.StreamHandler()
+stream.setLevel(LOG_LEVEL)
+stream.setFormatter(formatter)
+log = logging.getLogger('pythonConfig')
+log.setLevel(LOG_LEVEL)
+log.addHandler(stream)
+
+
 # prepare and create the whole app
 from flask import Flask
 from flask_socketio import SocketIO
@@ -37,21 +52,8 @@ from quantum3d import socket_api
 socketio = SocketIO(printer_app)
 socketio.on_namespace(socket_api.info.SocketBase('/'))
 
-# coloring the logs and disabling default flask logs
-import logging
-LOG_LEVEL = logging.DEBUG
-LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
-from colorlog import ColoredFormatter
-logging.root.setLevel(LOG_LEVEL)
-formatter = ColoredFormatter(LOGFORMAT)
-stream = logging.StreamHandler()
-stream.setLevel(LOG_LEVEL)
-stream.setFormatter(formatter)
-log = logging.getLogger('pythonConfig')
-log.setLevel(LOG_LEVEL)
-log.addHandler(stream)
 
-''' disable flask logging '''
+# disable flask logging
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
