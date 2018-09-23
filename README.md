@@ -1,8 +1,11 @@
 # Quantum 3d Printer UI - By Persia Printer
 For full documentation on this, go to www.persia3dprinter.ir
 
+## How to install:
+### `pip install quantum3d`
+### `pip install -r requirements.txt`
 ## How to run:  
-### use `python app.py` to run the app  
+### `python app.py`
 Note: Environment variables usage:  
 To be able to run the app, use `FLASK_APP=quantum3d`  
 For setting the base directory of usb mount, use `BASE_PATH`, which for raspberry pi by default should be set to `/media/pi`  
@@ -12,7 +15,7 @@ To set the database name, use `DB_NAME=<name>` (default: `database`)
 To set database connection limit if failed, use `DB_CONNECTION_LIMIT=<number>` (default is `3`)
 
 ## How to test:  
-### use `python test.py` to run the tests  
+### `python test.py`
 Note: use `-q` and `-v` for quiet and verbose running, respectively  
 Note: the only way you'd know that you're in test mode, if anywhere needed, is by `ENV_MODE=test` env var, which is set at the beginning of test execution  
 Note: Environment variables usage:  
