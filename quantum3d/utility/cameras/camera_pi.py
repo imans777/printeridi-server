@@ -4,7 +4,7 @@ try:
     import picamera
 except ImportError:
     print("Pi Camera not found. Are you running on rpi?")
-from camera_base import CameraBase
+from .camera_base import CameraBase
 
 
 class Camera(CameraBase):
