@@ -95,8 +95,8 @@ class PrinterDB:
     def set_default_settings(self, force=False):
         # force=true only affects the 'default' row in settings table!
         # and it doesn't remove other rows!
-        self.cursor.execute(f"""
-            INSERT {"OR REPLACE" if force else "OR IGNORE"} INTO Settings
+        self.cursor.execute("""
+            INSERT {} INTO Settings
             (name, bedleveling_X1, bedleveling_X2,
             bedleveling_Y1, bedleveling_Y2,
             traveling_feedrate, bedleveling_Z_ofsset,
@@ -104,13 +104,13 @@ class PrinterDB:
             hibernate_Z_move_feedrate, pause_Z_offset,
             pause_Z_move_feedrate, printing_buffer)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, self.default_settings)
+        """.format("OR REPLACE" if force else "OR IGNORE"), self.default_settings)
 
-        self.cursor.execute(f"""
-            INSERT {"OR REPLACE" if force else "OR IGNORE"} INTO Extra
+        self.cursor.execute("""
+            INSERT {} INTO Extra
             (id, ABS, pin)
             VALUES (?, ?, ?)
-        """, (0, 1, ''))
+        """.format("OR REPLACE" if force else "OR IGNORE"), (0, 1, ''))
 
     @error_handler_with(message)
     def get_settings(self, name='default'):
