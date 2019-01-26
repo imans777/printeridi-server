@@ -8,3 +8,4 @@ psutil
 configparser
 picamera
 shortid
+flask-cors

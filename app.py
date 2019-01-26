@@ -17,8 +17,8 @@ if __name__ == '__main__':
         UPLOAD_FOLDER=os.environ['UPLOAD_FOLDER']
     )
 
-    # Run chromium if wasn't on windows
-    if os.environ['CUR_ENV'].lower() == 'rpi':
+    # Run chromium if wasn't in development nor on windows
+    if os.environ['FLASK_ENV'] != 'development' and os.environ['CUR_ENV'].lower() == 'rpi':
         print('-> On raspberry pi')
         import subprocess
         subprocess.Popen(["chromium-browser", "--disk-cache-dir=/dev/null",
