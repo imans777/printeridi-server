@@ -9,9 +9,12 @@ For full documentation on this, go to www.persia3dprinter.ir
 Note: Environment variables usage:  
 To be able to run the app, use `FLASK_APP=quantum3d`  
 For setting the base directory of usb mount, use `BASE_PATH`, which for raspberry pi by default should be set to `/media/pi`  
-For development, use `FLASK_ENV=development`  
-To test on windows, use `DEV_ENV=windows`  
+For development, use `FLASK_ENV=development`   
 To set the database name, use `DB_NAME=<name>` (default: `database`)  
+To enable camera support, use `CAMERA=<name>` (e.g. `pi`)  
+To set a directory for uploading files, use `UPLOAD_FOLDER=</path/to/folder>` (default: `uploads`)
+
+
 To set database connection limit if failed, use `DB_CONNECTION_LIMIT=<number>` (default is `3`)
 
 ## How to test:  

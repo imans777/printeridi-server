@@ -12,8 +12,20 @@ def env_initiation():
     env_path = Path('..') / '.env'
     load_dotenv(dotenv_path=str(env_path))
 
-    # Necessary fallback
+    # Necessary fallbacks
     import os
+    # check if on raspberry pi platform
+    if hasattr(os, 'uname'):
+        if os.uname()[4][:3] == 'arm':
+            print("Platform Detected: 'raspberry pi'")
+            os.environ['CUR_ENV'] = 'rpi'
+        else:
+            print("Platform Detected: 'linux'")
+            os.environ['CUR_ENV'] = os.uanme()[4][:3]
+    else:
+        print("Platform Detected: 'windows'")
+        os.environ['CUR_ENV'] = 'win'
+    # check FLASK_APP environ being set
     if os.environ.get('FLASK_APP') is None:
         os.environ['FLASK_APP'] = 'quantum3d'
 

@@ -8,7 +8,7 @@ backup_print_path.bc
 #.env
 #quantum3d/static/ OR MAYBE JUST static/ ???
 #quantum3d/templates/ " " " "
-
+quantum3d/uploads/
 
 # IDE and Editors
 .idea/

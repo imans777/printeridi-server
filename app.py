@@ -6,18 +6,19 @@ if __name__ == '__main__':
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     # print('realpath: ', os.path.dirname(os.path.realpath(__file__)))
     # TODO: Maybe also need to set PYTHONPATH!
-    # TODO: SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D)
+    # TODO: SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D) (for the prints to be organized)
     # TODO: SHOULD HAVE AN EXCEPTION CLASS!
     # TODO: what if we implement Socket, but still use app.run?! will sockets work in that way?
 
     # Main app
     from quantum3d import printer_app
     printer_app.config.update(
-        SECRET_KEY='T|-|E @R|<@M |<N|G|-|T'
+        SECRET_KEY='T|-|E @R|<@M |<N|G|-|T',
+        UPLOAD_FOLDER=os.environ['UPLOAD_FOLDER']
     )
 
     # Run chromium if wasn't on windows
-    if os.environ['DEV_ENV'].lower() != 'windows':
+    if os.environ['CUR_ENV'].lower() == 'rpi':
         print('-> On raspberry pi')
         import subprocess
         subprocess.Popen(["chromium-browser", "--disk-cache-dir=/dev/null",

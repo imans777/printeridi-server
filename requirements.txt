@@ -6,3 +6,4 @@ colorlog
 ddt
 psutil
 configparser
+picamera
