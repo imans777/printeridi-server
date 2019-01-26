@@ -4,7 +4,7 @@ import time
 import subprocess
 
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
-
+const_local = '127.0.0.1'
 
 class Utils():
     ''' Used for reading wifi config from config file '''
@@ -33,11 +33,11 @@ class Utils():
         Technically, only these are possible:
             'localhost'
             '127.0.0.1'
+            '0.0.0.0'
             '192.168.X.X' -> local device ip from that network
         '''
-        const_local = '127.0.0.1'
         ip = request.headers.get('Host')
-        return const_local if ip == 'localhost' else ip
+        return const_local if (ip == 'localhost' or ip == '0.0.0.0') else ip
 
     @staticmethod
     def get_ip_list():

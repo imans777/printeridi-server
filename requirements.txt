@@ -7,3 +7,4 @@ ddt
 psutil
 configparser
 picamera
+shortid
