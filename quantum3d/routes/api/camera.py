@@ -32,6 +32,6 @@ def cameraSaveImage():
     '''
       takes an image and saves it locally
     '''
-    fr = getLastFrame(Camera())
     import os
-    fr.save(os.path.join(os.getcwd(), 'test.jpeg'))
+    Camera().capture(os.path.join(os.getcwd(), 'test.jpeg'))
+    return Response(status=200)
