@@ -22,7 +22,7 @@ def uploadFile():
     if 'uploadFile' not in request.files:
         abort(404)
     file = request.files['uploadFile']
-    if file.filename == '':
+    if not file.filename:
         abort(404)
 
     if file and allowed_file(file.filename):
@@ -48,8 +48,20 @@ def getUploadedFiles():
     return filenames
 
 
-@app.route('/upload-file', methods=['DELETE'])
-def deleteFile():
+@app.route('/upload-file/<path:path>', methods=['DELETE'])
+def deleteFile(path):
     """
-    DELETEs an uploaded file given the name
+    DELETEs an uploaded file given the name (without ext - simple name)
     """
+    if not os.path.isdir(UPLOAD_FULL_PATH):
+        abort(404)
+
+    if '.' in path:
+        abort(404)
+
+    full_file_path = os.path.join(UPLOAD_FULL_PATH, path, '.gcode')
+    if not os.path.isfile(full_file_path):
+        abort(404)
+
+    os.remove(full_file_path)
+    return Response(status=200)

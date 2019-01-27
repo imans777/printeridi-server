@@ -4,6 +4,7 @@ __license__ = "The MIT License <http://opensource.org/licenses/MIT>"
 __copyright__ = "Copyright (C) 2018 Iman Sahebi - Released under terms of the MIT License"
 
 import os
+RESERVED_NAMES = ['consts.py']
 try:
     package = os.environ['FLASK_APP'].strip()
 except:
@@ -14,6 +15,9 @@ namespace = '.'.join(dirname[dirname.index(package):].split(os.path.sep))
 
 pyList = os.scandir(dirname)
 for item in pyList:
-    if item.is_file() and item.name != filename:
-        name = item.name.split('.')[0]  # remove extension
-        getattr(__import__(namespace, fromlist=[name]), name)
+    try:
+        if item.is_file() and item.name != filename:
+            name = item.name.split('.')[0]  # remove extension
+            getattr(__import__(namespace, fromlist=[name]), name)
+    except:
+        pass
