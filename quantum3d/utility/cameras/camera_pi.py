@@ -9,6 +9,14 @@ from .camera_base import CameraBase
 
 class Camera(CameraBase):
     @staticmethod
+    def capture(dest, resize=(640, 480)):
+        try:
+            with picamera.PiCamera() as camera:
+                camera.capture(dest, resize=resize)
+        except Exception as e:
+            print("pi camera capture err: ", e)
+
+    @staticmethod
     def frames():
         try:
             with picamera.PiCamera() as camera:
@@ -23,4 +31,4 @@ class Camera(CameraBase):
                     stream.seek(0)
                     stream.truncate()
         except Exception as e:
-            print("pi camera err: ", e)
+            print("pi camera frames err: ", e)

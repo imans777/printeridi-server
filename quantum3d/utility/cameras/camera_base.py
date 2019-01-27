@@ -93,6 +93,13 @@ class CameraBase(object):
         return CameraBase.frame
 
     @staticmethod
+    def capture():
+        '''
+            functionality to capture a new image independently
+        '''
+        raise RuntimeError('Camera capture is not implemented')
+
+    @staticmethod
     def frames():
         '''
           the main generator that produces the camera frames
