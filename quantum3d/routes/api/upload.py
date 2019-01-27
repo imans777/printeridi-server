@@ -1,5 +1,5 @@
 import os
-from flask import request, Response, abort, current_app
+from flask import request, Response, abort, current_app, send_from_directory
 from werkzeug.utils import secure_filename
 
 from quantum3d.routes import api_bp as app
@@ -38,5 +38,7 @@ def uploadFile():
         if not os.path.isdir(upload_folder):
             os.mkdir(upload_folder)
         filename = secure_filename(file.filename)
-        file.save(os.path.join(upload_folder, filename))
+        file.save(os.path.join(upload_folder, 'files', filename))
     return Response(status=200)
+
+

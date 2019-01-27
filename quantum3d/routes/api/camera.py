@@ -1,7 +1,8 @@
 
-from flask import request, Response
+from flask import request, Response, current_app, send_from_directory, abort
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import Camera
+import os
 
 
 def getLastFrame(camera):
@@ -33,5 +34,13 @@ def cameraSaveImage():
       takes an image and saves it locally
     '''
     import os
-    Camera().capture(os.path.join(os.getcwd(), 'test.jpeg'))
+    Camera().capture(os.path.join(
+        os.getcwd(),
+        os.environ['FLASK_APP'] or 'quantum3d',
+        current_app.config['UPLOAD_FOLDER'],
+        'screenshots',
+        # TODO: this should be a name according to the model's filename and the z-layer (maybe +timestamp?)
+        'test.jpeg'
+    ))
     return Response(status=200)
+
