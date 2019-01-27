@@ -1,5 +1,5 @@
 
-from flask import request, Response, current_app, send_from_directory, abort
+from flask import request, Response, current_app, abort
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import Camera
 from .consts import SC_FULL_PATH

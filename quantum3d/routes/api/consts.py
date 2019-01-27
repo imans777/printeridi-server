@@ -1,12 +1,11 @@
 
 import os
-from flask import current_app
 
 # Base upload full path
 BASE_FULL_UPLOAD = os.path.join(
     os.getcwd(),
     os.environ['FLASK_APP'] or 'quantum3d',
-    current_app.config['UPLOAD_FOLDER'],
+    os.environ['UPLOAD_FOLDER'] or 'uploads',
 )
 
 # screenshots full path
