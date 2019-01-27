@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     # Run chromium if wasn't in development nor on windows
     if os.environ['FLASK_ENV'] != 'development' and os.environ['CUR_ENV'].lower() == 'rpi':
-        print('-> On raspberry pi')
+        print('-> starting chromium')
         import subprocess
         subprocess.Popen(["chromium-browser", "--disk-cache-dir=/dev/null",
                           "--disk-catch-size=1", "--hide-scrollbars",

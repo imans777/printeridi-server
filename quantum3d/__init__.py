@@ -25,9 +25,18 @@ def env_initiation():
     else:
         print("Platform Detected: 'windows'")
         os.environ['CUR_ENV'] = 'win'
+
     # check FLASK_APP environ being set
     if os.environ.get('FLASK_APP') is None:
         os.environ['FLASK_APP'] = 'quantum3d'
+
+    # check BASE_PATH to be set
+    if os.environ.get('BASE_PATH') is None:
+        os.environ['BASE_PATH'] = '/media/pi'
+
+    # check UPLOAD_FOLDER being set
+    if os.environ.get('UPLOAD_FOLDER') is None:
+        os.environ['UPLOAD_FOLDER'] = 'uploads'
 
 
 env_initiation()

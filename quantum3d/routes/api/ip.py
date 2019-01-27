@@ -8,7 +8,8 @@ from quantum3d.utility import Utils
 def ip_list():
     """
     Returns the list of device's IP (if any)
-    Also connects to the device to the config-file wifi-settings if provided on second time!
+    Also connects the device to the config-file wifi-settings if provided on second time!
+    (The first time the system is not fully up yet, so connection doesn't work)
     POST:
         Response: {
             ips: String[]

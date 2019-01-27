@@ -98,13 +98,13 @@ class CameraBase(object):
           the main generator that produces the camera frames
         '''
         raise RuntimeError('Camera frames is not implemented')
-    
+
     @classmethod
     def _thread(cls):
         '''
             camera background thread
         '''
-        print('-> starting camera thread')
+        print('-> starting camera thread for new viewer')
         frame_iter = cls.frames()
         for frame in frame_iter:
             CameraBase.frame = frame
