@@ -1,6 +1,7 @@
 
 from flask import current_app, send_from_directory, abort
 from quantum3d.routes import api_bp as app
+from .consts import BASE_FULL_UPLOAD, VALID_FOLDERS
 import os
 
 # TODO: the question is how the client should know which 'path' to request?
@@ -14,13 +15,11 @@ def sendFile(folder, path):
           an uploaded gcode file,
         given the name
     '''
-    print('folder :', folder)
-    if folder not in ['screenshots', 'files']:
+    if folder not in VALID_FOLDERS:
         abort(404)
 
-    return send_from_directory(os.path.join(
-        os.getcwd(),
-        os.environ['FLASK_APP'],
-        current_app.config['UPLOAD_FOLDER'],
-        folder
-    ), path)
+    with_folder_path = os.path.join(BASE_FULL_UPLOAD, folder)
+    if not os.listdir(with_folder_path):
+        abort(404)
+
+    return send_from_directory(os.path.join(with_folder_path), path)

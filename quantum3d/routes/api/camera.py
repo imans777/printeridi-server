@@ -2,6 +2,7 @@
 from flask import request, Response, current_app, send_from_directory, abort
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import Camera
+from .consts import SC_FULL_PATH
 import os
 
 
@@ -31,16 +32,13 @@ def cameraFeed():
 @app.route('/camera-save')
 def cameraSaveImage():
     '''
-      takes an image and saves it locally
+      takes (captures) an image and saves it locally
     '''
-    import os
+    if not os.path.isdir(SC_FULL_PATH):
+        os.makedirs(SC_FULL_PATH)
     Camera().capture(os.path.join(
-        os.getcwd(),
-        os.environ['FLASK_APP'] or 'quantum3d',
-        current_app.config['UPLOAD_FOLDER'],
-        'screenshots',
+        SC_FULL_PATH,
         # TODO: this should be a name according to the model's filename and the z-layer (maybe +timestamp?)
         'test.jpeg'
     ))
     return Response(status=200)
-

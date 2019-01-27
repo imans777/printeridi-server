@@ -4,10 +4,7 @@ from werkzeug.utils import secure_filename
 
 from quantum3d.routes import api_bp as app
 from quantum3d.db import db
-
-ALLOWED_EXTENSIONS = set(
-    ['gcode']
-)
+from .consts import ALLOWED_EXTENSIONS, UPLOAD_FULL_PATH
 
 
 def allowed_file(filename):
@@ -29,16 +26,30 @@ def uploadFile():
         abort(404)
 
     if file and allowed_file(file.filename):
-        upload_folder = os.path.join(
-            os.getcwd(),
-            os.environ['FLASK_APP'] or 'quantum3d',
-            current_app.config['UPLOAD_FOLDER']
-        )
-
-        if not os.path.isdir(upload_folder):
-            os.mkdir(upload_folder)
+        if not os.path.isdir(UPLOAD_FULL_PATH):
+            os.makedirs(UPLOAD_FULL_PATH)
         filename = secure_filename(file.filename)
-        file.save(os.path.join(upload_folder, 'files', filename))
+        file.save(os.path.join(UPLOAD_FULL_PATH, filename))
     return Response(status=200)
 
 
+@app.route('/upload-file', methods=['GET'])
+def getUploadedFiles():
+    """
+    GETs the name of all the uploaded files
+    """
+    if not os.path.isdir(UPLOAD_FULL_PATH):
+        os.makedirs(UPLOAD_FULL_PATH)
+    files = os.listdir(UPLOAD_FULL_PATH)
+    filenames = []
+    for name in files:
+        if os.path.isfile(os.path.join(UPLOAD_FULL_PATH, name)) and str(name).endswith('.gcode'):
+            filenames.append(str(name))
+    return filenames
+
+
+@app.route('/upload-file', methods=['DELETE'])
+def deleteFile():
+    """
+    DELETEs an uploaded file given the name
+    """
