@@ -40,5 +40,3 @@ def uploadFile():
         filename = secure_filename(file.filename)
         file.save(os.path.join(upload_folder, filename))
     return Response(status=200)
-
-
