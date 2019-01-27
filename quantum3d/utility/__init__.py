@@ -14,6 +14,7 @@ from .extended_board import ExtendedBoard
 # import camera driver
 import os
 from importlib import import_module
+Camera = None
 if os.environ.get('CAMERA'):
     Camera = import_module('.cameras.camera_' + os.environ['CAMERA'], package='quantum3d.utility').Camera
 else:

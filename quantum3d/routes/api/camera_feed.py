@@ -18,3 +18,6 @@ def cameraFeed():
     '''
     return Response(generateCameraFeed(Camera()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# TODO: maybe an API is needed to get which camera you want to use
+# and then update Camera variable in utility/__init__ so it be dynamic
