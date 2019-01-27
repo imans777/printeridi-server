@@ -8,11 +8,12 @@ from .camera_base import CameraBase
 
 
 class Camera(CameraBase):
+    cameraObj = None
+
     @staticmethod
     def capture(dest, resize=(640, 480)):
         try:
-            with picamera.PiCamera() as camera:
-                camera.capture(dest, resize=resize)
+            Camera.cameraObj.capture(dest, resize=resize)
         except Exception as e:
             print("pi camera capture err: ", e)
 
@@ -21,6 +22,7 @@ class Camera(CameraBase):
         try:
             with picamera.PiCamera() as camera:
                 # camera initialization
+                Camera.cameraObj = camera
                 time.sleep(2)
 
                 stream = io.BytesIO()
