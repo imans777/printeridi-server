@@ -16,9 +16,27 @@ import os
 from importlib import import_module
 Camera = None
 if os.environ.get('CAMERA'):
-    Camera = import_module('.cameras.camera_' + os.environ['CAMERA'], package='quantum3d.utility').Camera
+    Camera = import_module(
+        '.cameras.camera_' + os.environ['CAMERA'], package='quantum3d.utility').Camera
 else:
     print("!! Camera not found")
+
+
+def changeCameraTo(cam):
+    ''' this changes the Camera object to a desired camera '''
+    global Camera
+    try:
+        if cam == 'pi':
+            Camera = import_module('.cameras.camera_pi',
+                                   package='quantum3d.utility').Camera
+        else:  # unsupported camera
+            Camera = import_module('.cameras.camera_base',
+                                   package='quantum3d.utility').CameraBase
+            return False
+    except:
+        return False
+    return True
+
 
 # use this objects to work with utility
 printer = Machine()

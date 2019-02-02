@@ -15,6 +15,9 @@ def get_last_prints_info():
         }
         Response: [{print info}]
     """
-    limit = request.json.get('limit') or 10
+    try:
+        limit = request.json.get('limit')
+    except:
+        limit = 10
     data = db.get_last_prints(limit)
     return jsonify(data), 200

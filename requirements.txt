@@ -9,3 +9,4 @@ configparser
 picamera
 shortid
 flask-cors
+pickledb

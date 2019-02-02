@@ -1,5 +1,5 @@
 import os
-from flask import request, Response, abort, current_app, send_from_directory
+from flask import request, Response, abort, current_app, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 
 from quantum3d.routes import api_bp as app
@@ -33,6 +33,9 @@ def uploadFile():
     return Response(status=200)
 
 
+# TODO: need an API for printer settings
+# TODO: need an API for getting raspberry hardware info
+
 @app.route('/upload-file', methods=['GET'])
 def getUploadedFiles():
     """
@@ -44,8 +47,8 @@ def getUploadedFiles():
     filenames = []
     for name in files:
         if os.path.isfile(os.path.join(UPLOAD_FULL_PATH, name)) and str(name).endswith('.gcode'):
-            filenames.append(str(name))
-    return filenames
+            filenames.append(str(name).split('.')[0])
+    return jsonify({'files': filenames})
 
 
 @app.route('/upload-file/<path:path>', methods=['DELETE'])

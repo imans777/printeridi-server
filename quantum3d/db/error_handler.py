@@ -7,7 +7,14 @@ def message(func, e):
     try:
         print("ERROR db in function '", func.__name__, "' -> ", str(e))
     except:
-        print("ERROR db in function '", func.__name__, "' -> ", str(e))
+        print("ERROR db in function '", func.__name__, "'")
+
+
+def pickle_message(func, e):
+    try:
+        print("ERROR pickledb in function '", func.__name__, "' -> ", str(e))
+    except:
+        print("ERROR pickledb in function '", func.__name__, "'")
 
 
 def error_handler_with(handler):

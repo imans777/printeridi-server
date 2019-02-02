@@ -38,6 +38,10 @@ def env_initiation():
     if os.environ.get('UPLOAD_FOLDER') is None:
         os.environ['UPLOAD_FOLDER'] = 'uploads'
 
+    # check STATIC_FOLDER being set
+    if os.environ.get('STATIC_FOLDER') is None:
+        os.environ['STATIC_FOLDER'] = 'static'
+
 
 env_initiation()
 
