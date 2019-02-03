@@ -44,11 +44,11 @@ def cameraList():
         'cameras': [{
             'name': 'Pi-Camera',
             'link': 'pi',
-            'icon': 'camera'
+            'icon': '/static/assets/rpicamera.png',
         }, {
             'name': 'Webcam',
             'link': 'webcam',
-            'icon': 'photo_camera'
+            'icon': '/static/assets/webcam.png'
         }]
     })
 
