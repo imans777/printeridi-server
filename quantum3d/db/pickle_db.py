@@ -16,6 +16,7 @@ class PickleDB:
                 os.path.dirname(__file__),
                 'printerpickle.db'
             ), False)
+            print("-> pickledb initialized")
         except Exception as e:
             print("could not create pickledb connection: ", e)
             self.db = None
