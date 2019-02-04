@@ -55,6 +55,7 @@ def printing():
                 )
             else:
                 printer.start_printing_thread(gcode_dir=gcode_file_address)
+            # TODO: put the file inside uploads files and print from there to avoid usb crash, etc.!
         elif action == 'stop':
             printer.stop_printing()
             printer.delete_last_print_files()
