@@ -13,6 +13,7 @@ import os
 from .print_time import Time
 from .extended_board import ExtendedBoard
 from quantum3d.db import db
+from quantum3d.routes.api.consts import UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
 
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
 
@@ -763,10 +764,19 @@ class Machine:
     ''' print '''
 
     def start_printing_thread(self, gcode_dir, line=0):
-        print('@@@ printing file dir:', gcode_dir)
         self.time = Time()
         self.printing_file = gcode_dir
-        gcode_dir = self.base_path + '/' + gcode_dir
+        if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
+            gcode_dir = os.path.join(
+                UPLOAD_FULL_PATH,
+                gcode_dir[len(UPLOAD_PROTOCOL):] + '.gcode' # client sends the name w/o ext
+            )
+        else:
+            gcode_dir = os.path.join(
+                self.base_path,
+                gcode_dir
+            )
+        print('@@@ printing file dir:', gcode_dir)
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
         if self.use_ext_board:

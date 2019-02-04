@@ -23,13 +23,20 @@ LANGUAGE_FOLDER_FULL_PATH = os.path.join(
     'languages'
 )
 
+# download folder for usb
+USBS = 'usbs'
+
 # valid upload folders
 VALID_FOLDERS = [
     'screenshots',
-    'files'
+    'files',
+    USBS
 ]
 
 # allowed upload file extensions
 ALLOWED_EXTENSIONS = set(
     ['gcode']
 )
+
+# upload protocol
+UPLOAD_PROTOCOL = 'upload://'
