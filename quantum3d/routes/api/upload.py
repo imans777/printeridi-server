@@ -54,7 +54,7 @@ def getUploadedFiles():
 @app.route('/upload-file/<path:path>', methods=['DELETE'])
 def deleteFile(path):
     """
-    DELETEs an uploaded file given the name (without ext - simple name)
+    DELETEs an uploaded file given the name (e.g. 'test.gcode')
     """
     if not os.path.isdir(UPLOAD_FULL_PATH):
         abort(404)
@@ -62,7 +62,7 @@ def deleteFile(path):
     if '.' in path:
         abort(404)
 
-    full_file_path = os.path.join(UPLOAD_FULL_PATH, path, '.gcode')
+    full_file_path = os.path.join(UPLOAD_FULL_PATH, path)
     if not os.path.isfile(full_file_path):
         abort(404)
 
