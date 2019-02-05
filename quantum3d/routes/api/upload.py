@@ -47,7 +47,7 @@ def getUploadedFiles():
     filenames = []
     for name in files:
         if os.path.isfile(os.path.join(UPLOAD_FULL_PATH, name)) and str(name).endswith('.gcode'):
-            filenames.append(str(name).split('.')[0])
+            filenames.append(str(name))
     return jsonify({'files': filenames})
 
 

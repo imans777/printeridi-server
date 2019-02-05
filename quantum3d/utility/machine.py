@@ -776,8 +776,7 @@ class Machine:
         if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
             gcode_dir = os.path.join(
                 UPLOAD_FULL_PATH,
-                # client sends the name w/o ext
-                gcode_dir[len(UPLOAD_PROTOCOL):] + '.gcode'
+                gcode_dir[len(UPLOAD_PROTOCOL):]
             )
         else:
             gcode_dir = os.path.join(
