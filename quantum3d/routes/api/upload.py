@@ -56,12 +56,19 @@ def deleteFile(path):
     """
     DELETEs an uploaded file given the name (e.g. 'test.gcode')
     """
+    # upload directory must exist
     if not os.path.isdir(UPLOAD_FULL_PATH):
         abort(404)
 
-    if '.' in path:
+    # only there should be a '.' for extension, not for directories
+    if str(path).count('.') != 1:
         abort(404)
 
+    # there should not be os separator to be used for directories
+    if os.path.sep in path:
+        abort(404)
+
+    # file should exist and should be of file type
     full_file_path = os.path.join(UPLOAD_FULL_PATH, path)
     if not os.path.isfile(full_file_path):
         abort(404)
