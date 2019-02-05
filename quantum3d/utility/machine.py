@@ -13,9 +13,16 @@ import os
 from .print_time import Time
 from .extended_board import ExtendedBoard
 from quantum3d.db import db
-from quantum3d.routes.api.consts import UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
 
+# global consts (also exists on routes/api/consts.py)
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
+UPLOAD_PROTOCOL = 'upload://'
+UPLOAD_FULL_PATH = os.path.join(
+    os.getcwd(),
+    os.environ['FLASK_APP'] or 'quantum3d',
+    os.environ['UPLOAD_FOLDER'] or 'uploads',
+    'files'
+)
 
 
 class Machine:
@@ -769,7 +776,8 @@ class Machine:
         if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
             gcode_dir = os.path.join(
                 UPLOAD_FULL_PATH,
-                gcode_dir[len(UPLOAD_PROTOCOL):] + '.gcode' # client sends the name w/o ext
+                # client sends the name w/o ext
+                gcode_dir[len(UPLOAD_PROTOCOL):] + '.gcode'
             )
         else:
             gcode_dir = os.path.join(

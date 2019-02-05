@@ -11,7 +11,7 @@ BASE_FULL_UPLOAD = os.path.join(
 # screenshots full path
 SC_FULL_PATH = os.path.join(BASE_FULL_UPLOAD, 'screenshots')
 
-# upload files fill path
+# upload files fill path (also exists on utility/machine.py)
 UPLOAD_FULL_PATH = os.path.join(BASE_FULL_UPLOAD, 'files')
 
 # language folder path
@@ -23,7 +23,7 @@ LANGUAGE_FOLDER_FULL_PATH = os.path.join(
     'languages'
 )
 
-# download folder for usb
+# 'download API' <folder> for usb
 USBS = 'usbs'
 
 # valid upload folders
@@ -38,5 +38,5 @@ ALLOWED_EXTENSIONS = set(
     ['gcode']
 )
 
-# upload protocol
+# upload protocol (also exists on utility/machine.py)
 UPLOAD_PROTOCOL = 'upload://'

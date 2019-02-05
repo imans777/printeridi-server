@@ -24,7 +24,8 @@ for item in pyList:
                 continue
 
             getattr(__import__(namespace, fromlist=[name]), name)
-    except:
+    except Exception as e:
+        print("error importing API route file: ", e)
         errCnt += 1
 
 if errCnt:
