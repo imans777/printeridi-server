@@ -60,12 +60,8 @@ def deleteFile(path):
     if not os.path.isdir(UPLOAD_FULL_PATH):
         abort(404)
 
-    # only there should be a '.' for extension, not for directories
-    if str(path).count('.') != 1:
-        abort(404)
-
     # there should not be os separator to be used for directories
-    if os.path.sep in path:
+    if os.path.sep in path or ['/', '\\'] in path:
         abort(404)
 
     # file should exist and should be of file type
