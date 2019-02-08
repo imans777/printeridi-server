@@ -26,8 +26,8 @@ def changeCameraTo(cam):
     ''' this changes the Camera object to a desired camera '''
     global Camera
     try:
-        if cam == 'pi':
-            Camera = import_module('.cameras.camera_pi',
+        if cam == 'pi' or cam == 'webcam':
+            Camera = import_module('.cameras.camera_' + cam,
                                    package='quantum3d.utility').Camera
         else:  # unsupported camera
             Camera = import_module('.cameras.camera_base',

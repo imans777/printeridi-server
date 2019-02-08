@@ -10,3 +10,4 @@ picamera
 shortid
 flask-cors
 pickledb
+pygame
