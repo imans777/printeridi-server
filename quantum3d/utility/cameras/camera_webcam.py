@@ -1,5 +1,7 @@
 from .camera_base import CameraBase
 import pygame
+import pygame.camera
+import time
 
 
 class Camera(CameraBase):
@@ -21,9 +23,12 @@ class Camera(CameraBase):
             cams = pygame.camera.list_cameras()
             print("camera list : ", cams)
             cam = pygame.camera.Camera(cams[0])
-            cam.start()
 
+            time.sleep(2)
+            cam.start()
+            time.sleep(2)
             Camera.camerObj = cam
+            time.sleep(2)
 
             while True:
                 image = cam.get_image()
@@ -32,3 +37,4 @@ class Camera(CameraBase):
             cam.stop()
         except Exception as e:
             print("webcam camera frames err: ", e)
+            Camera.frames()
