@@ -18,23 +18,24 @@ class Camera(CameraBase):
     @staticmethod
     def frames():
         try:
-            pygame.init()
-            pygame.camera.init()
-            cams = pygame.camera.list_cameras()
-            print("camera list : ", cams)
-            cam = pygame.camera.Camera(cams[0])
-
-            time.sleep(2)
-            cam.start()
-            time.sleep(2)
-            Camera.camerObj = cam
-            time.sleep(2)
-
             while True:
-                image = cam.get_image()
-                yield image
+                pygame.init()
+                pygame.camera.init()
+                cams = pygame.camera.list_cameras()
+                print("camera list : ", cams)
+                cam = pygame.camera.Camera(cams[0])
 
-            cam.stop()
+                time.sleep(2)
+                cam.start()
+                time.sleep(2)
+                Camera.camerObj = cam
+                time.sleep(2)
+
+                while True:
+                    image = cam.get_image()
+                    yield image
+
+                cam.stop()
         except Exception as e:
             print("webcam camera frames err: ", e)
             Camera.frames()
