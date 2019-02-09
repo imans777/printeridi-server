@@ -47,5 +47,6 @@ PICKLE_KEYS = [
     'lang',
     'theme',
     'print_file_dir',
-    'gcode_downloadable_link'
+    'gcode_downloadable_link',
+    'sc_index'
 ]

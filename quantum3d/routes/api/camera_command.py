@@ -2,6 +2,7 @@
 from flask import request, Response, current_app, abort, json, jsonify
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import Camera, changeCameraTo
+from quantum3d.db import pdb
 from .consts import SC_FULL_PATH
 import os
 
@@ -68,16 +69,21 @@ def cameraSet():
         abort(500)
 
 
-@app.route('/camera-save')
+@app.route('/camera-save', methods=['POST'])
 def cameraSaveImage():
     '''
       takes (captures) an image and saves it locally
     '''
     if not os.path.isdir(SC_FULL_PATH):
         os.makedirs(SC_FULL_PATH)
+
+    f, idx = pdb.get_key('print_file_dir'), pdb.get_key('sc_index')
+
+    f = f.split('.')[0].split('/')[-1]
+    pdb.set_key('sc_index', idx + 1)
+
     Camera().capture(os.path.join(
         SC_FULL_PATH,
-        # TODO: this should be a name according to the model's filename and the z-layer (maybe +timestamp?)
-        'test.jpeg'
+        f + idx + '.jpeg'
     ))
     return Response(status=200)
