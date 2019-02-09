@@ -14,7 +14,7 @@ class Time:
     def restart(self):
         self.start_time = time.time()
 
-    # return value as milliseconds (SECONDS?!)
+    # return value as SECONDS
     def read(self):
         elapsed_time = time.time() - self.start_time
         return int(elapsed_time)
