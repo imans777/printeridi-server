@@ -25,11 +25,8 @@ class Camera(CameraBase):
                 print("camera list : ", cams)
                 cam = pygame.camera.Camera(cams[0])
 
-                time.sleep(2)
                 cam.start()
-                time.sleep(2)
                 Camera.camerObj = cam
-                time.sleep(2)
 
                 while True:
                     image = cam.get_image()

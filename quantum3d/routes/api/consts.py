@@ -40,3 +40,12 @@ ALLOWED_EXTENSIONS = set(
 
 # upload protocol (also exists on utility/machine.py)
 UPLOAD_PROTOCOL = 'upload://'
+
+
+# supported pickledb keys
+PICKLE_KEYS = [
+    'lang',
+    'theme',
+    'print_file_dir',
+    'gcode_downloadable_link'
+]

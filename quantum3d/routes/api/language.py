@@ -6,30 +6,6 @@ from quantum3d.db import pdb
 import os
 
 
-@app.route('/language', methods=['GET', 'POST'])
-def languageManip():
-    """
-    GETs the current language
-    Response: {
-      lang: string
-    }
-
-    POSTs a new language
-    Request: {
-      lang: string
-    }
-    """
-    if request.method == 'GET':
-        lang = pdb.get_key('lang')
-        return jsonify({'lang': lang}), 200
-    elif request.method == 'POST':
-        lang = request.json['lang']
-        if lang not in getLanguageList():
-            abort(404)
-        pdb.set_key('lang', lang)
-        return Response(status=200)
-
-
 @app.route('/language-list')
 def languageList():
     """
