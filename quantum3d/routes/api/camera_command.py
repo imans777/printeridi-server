@@ -43,25 +43,33 @@ def cameraList():
         }
     '''
 
-    # TODO: functionality incomplete!
     pygame.camera.init()
-    webcamlist = pygame.camera.list_cameras()
+    camlist = pygame.camera.list_cameras()
 
     vc_out = subprocess.Popen(
         ['vcgencmd', 'get_camera'], stdout=subprocess.PIPE).communicate()[0]
-    print("vc out is : ", vc_out)
-    
-    return jsonify({
-        'cameras': [{
-            'name': 'Pi-Camera',
-            'link': 'pi',
-            'icon': '/static/assets/rpicamera.png',
-        }, {
-            'name': 'Webcam',
-            'link': 'webcam',
-            'icon': '/static/assets/webcam.png'
-        }]
-    })
+    vc_out = vc_out.split(b'\n')[0].decode('utf-8').split(' ')
+    supp = []
+    for item in vc_out:
+        supp.append(item.split('=')[1])
+    if all(x == '1' for x in supp):
+        camlist.append('pi')
+
+    res = {'cameras': []}
+    for item in camlist:
+        if item == 'pi':
+            res['cameras'].append({
+                'name': 'Pi-Camera',
+                'link': 'pi',
+                'icon': '/static/assets/rpicamera.png'
+            })
+        else:
+            res['cameras'].append({
+                'name': 'Webcam',
+                'link': 'webcam',
+                'icon': '/static/assets/webcam.png'
+            })
+    return jsonify(res)
 
 
 @app.route('/camera-set', methods=['POST'])
@@ -72,7 +80,6 @@ def cameraSet():
             cam: 'pi' | 'webcam' | ...
         }
     '''
-    webcam_list = pygame.camera.list_cameras()
     cam = request.json.get('cam')
     if cam and changeCameraTo(cam):
         return Response(status=200)
