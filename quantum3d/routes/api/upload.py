@@ -1,5 +1,5 @@
 import os
-from flask import request, Response, abort, current_app, send_from_directory
+from flask import request, Response, abort, current_app, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 
 from quantum3d.routes import api_bp as app
@@ -33,6 +33,9 @@ def uploadFile():
     return Response(status=200)
 
 
+# TODO: need an API for printer settings
+# TODO: need an API for getting raspberry hardware info
+
 @app.route('/upload-file', methods=['GET'])
 def getUploadedFiles():
     """
@@ -45,21 +48,24 @@ def getUploadedFiles():
     for name in files:
         if os.path.isfile(os.path.join(UPLOAD_FULL_PATH, name)) and str(name).endswith('.gcode'):
             filenames.append(str(name))
-    return filenames
+    return jsonify({'files': filenames})
 
 
 @app.route('/upload-file/<path:path>', methods=['DELETE'])
 def deleteFile(path):
     """
-    DELETEs an uploaded file given the name (without ext - simple name)
+    DELETEs an uploaded file given the name (e.g. 'test.gcode')
     """
+    # upload directory must exist
     if not os.path.isdir(UPLOAD_FULL_PATH):
         abort(404)
 
-    if '.' in path:
+    # there should not be os separator to be used for directories
+    if os.path.sep in path or ['/', '\\'] in path:
         abort(404)
 
-    full_file_path = os.path.join(UPLOAD_FULL_PATH, path, '.gcode')
+    # file should exist and should be of file type
+    full_file_path = os.path.join(UPLOAD_FULL_PATH, path)
     if not os.path.isfile(full_file_path):
         abort(404)
 

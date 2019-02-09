@@ -12,7 +12,8 @@ For setting the base directory of usb mount, use `BASE_PATH`, which for raspberr
 For development, use `FLASK_ENV=development`   
 To set the database name, use `DB_NAME=<name>` (default: `database`)  
 To enable camera support, use `CAMERA=<name>` (e.g. `pi`)  
-To set a directory for uploading files and taken screenshots, use `UPLOAD_FOLDER=</path/to/folder>` (default: `uploads`)
+To set a directory for uploading files and taken screenshots, use `UPLOAD_FOLDER=</path/to/upload/folder>` (default: `uploads`)  
+To set a directory for static folder serving, use `STATIC_FOLDER=</path/to/static/folder>`  
 
 
 To set database connection limit if failed, use `DB_CONNECTION_LIMIT=<number>` (default is `3`)

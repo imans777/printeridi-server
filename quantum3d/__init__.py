@@ -38,6 +38,10 @@ def env_initiation():
     if os.environ.get('UPLOAD_FOLDER') is None:
         os.environ['UPLOAD_FOLDER'] = 'uploads'
 
+    # check STATIC_FOLDER being set
+    if os.environ.get('STATIC_FOLDER') is None:
+        os.environ['STATIC_FOLDER'] = 'static'
+
 
 env_initiation()
 
@@ -62,6 +66,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from quantum3d.routes import home_bp, api_bp
 from quantum3d.routes import home, api
+
 
 printer_app = Flask(__name__)
 CORS(printer_app)

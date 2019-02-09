@@ -6,6 +6,7 @@ import subprocess
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
 const_local = '127.0.0.1'
 
+
 class Utils():
     ''' Used for reading wifi config from config file '''
     is_first_time = 0
@@ -101,6 +102,8 @@ class Utils():
     @staticmethod
     def get_connected_usb():
         """ Returns a list of mounted USBs, if any """
+        # TODO:   check inside each folder and if they were empty,
+        # remove them from the list to avoid uncleaned empty usbs!
         sub_usb_dir = subprocess.Popen(
             ['ls', BASE_PATH], stdout=subprocess.PIPE).communicate()[0]
         sub_usb_dir = sub_usb_dir[:-1]

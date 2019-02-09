@@ -14,7 +14,15 @@ from .extended_board import ExtendedBoard
 from quantum3d.db import db
 from .parser import Parser
 
+# global consts (also exists on routes/api/consts.py)
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
+UPLOAD_PROTOCOL = 'upload://'
+UPLOAD_FULL_PATH = os.path.join(
+    os.getcwd(),
+    os.environ['FLASK_APP'] or 'quantum3d',
+    os.environ['UPLOAD_FOLDER'] or 'uploads',
+    'files'
+)
 
 
 class Machine:
@@ -678,10 +686,19 @@ class Machine:
     ''' print '''
 
     def start_printing_thread(self, gcode_dir, line=0):
-        print('@@@ printing file dir:', gcode_dir)
         self.time = Time()
         self.printing_file = gcode_dir
-        gcode_dir = self.base_path + '/' + gcode_dir
+        if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
+            gcode_dir = os.path.join(
+                UPLOAD_FULL_PATH,
+                gcode_dir[len(UPLOAD_PROTOCOL):]
+            )
+        else:
+            gcode_dir = os.path.join(
+                self.base_path,
+                gcode_dir
+            )
+        print('@@@ printing file dir:', gcode_dir)
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
         if self.use_ext_board:
