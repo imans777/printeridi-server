@@ -131,13 +131,12 @@ class Machine:
                 temps = {'current': 0, 'point': 0}
                 self.extruders_temp.append(temps)
 
-
             gcode_handler_thread = threading.Thread(
-                target = self.__Gcode_handler)
+                target=self.__Gcode_handler)
             gcode_handler_thread.start()
             return True, None
         except Exception as e:
-            print('erro in start_machine_connection',e)
+            print('error in start_machine_connection', e)
             return False, e
 
     def __Gcode_handler(self):
@@ -167,8 +166,10 @@ class Machine:
                               (self.__relay_state[0], self.__relay_state[1]))
 
                 if self.__Gcodes_to_run:
-                    print('send to machine', ('%s%s' %(self.__Gcodes_to_run[0], '\n')).encode('utf-8'))
-                    self.machine_serial.write((self.__Gcodes_to_run[0] + '\n').encode('utf-8'))
+                    print('send to machine', ('%s%s' %
+                                              (self.__Gcodes_to_run[0], '\n')).encode('utf-8'))
+                    self.machine_serial.write(
+                        (self.__Gcodes_to_run[0] + '\n').encode('utf-8'))
                     if self.__Gcodes_return[0] == 0:
                         while self.machine_serial.readline() != 'ok\n'.encode('utf-8'):
                             pass
@@ -256,7 +257,7 @@ class Machine:
 
         ''' read files lines'''
         for line in gcode_file:
-            lines.append( Parser.remove_chomp(line) )
+            lines.append(Parser.remove_chomp(line))
 
         '''hibernate mode'''
         if line_to_go != 0:
@@ -269,11 +270,15 @@ class Machine:
                 if 'M' in parse_line:
                     if parse_line['M'] == '190':
                         if 'T' in parse_line:
-                            self.extruder_temp['point'] = int(float(parse_line['S']))
-                            self.append_gcode('M109 S%f T%d' %(self.extruder_temp['point'],parse_line['T']), 3)
-                        else : 
-                            self.extruder_temp['point'] = int(float(parse_line['S']))
-                            self.append_gcode('M109 S%f T0' %(self.extruder_temp['point']), 3)
+                            self.extruder_temp['point'] = int(
+                                float(parse_line['S']))
+                            self.append_gcode('M109 S%f T%d' % (
+                                self.extruder_temp['point'], parse_line['T']), 3)
+                        else:
+                            self.extruder_temp['point'] = int(
+                                float(parse_line['S']))
+                            self.append_gcode('M109 S%f T0' %
+                                              (self.extruder_temp['point']), 3)
 
                     break
 
@@ -283,14 +288,11 @@ class Machine:
                 if 'M' in parse_line:
                     if parse_line['M'] == '190':
                         self.bed_temp['point'] = int(float(parse_line['S']))
-                        self.append_gcode('M190 S%f' % (self.bed_temp['point']), 2)
+                        self.append_gcode('M190 S%f' %
+                                          (self.bed_temp['point']), 2)
                     break
 
-
             '''               second smart hibernate                          '''
-
-
-
 
             '''                     third homing                              '''
             self.append_gcode('G91')
@@ -327,7 +329,7 @@ class Machine:
                 ''' stop printing when it is waiting in buffer'''
                 if self.__stop_flag:
                     break
-                time.sleep(0.1) # wait 100 msec for reduce cpu usage
+                time.sleep(0.1)  # wait 100 msec for reduce cpu usage
 
             # if self.use_ext_board :
             #     '''   check for existance of filament   '''
@@ -368,24 +370,26 @@ class Machine:
 
                 parse_command = Parser.parse(command)
 
+                if 'M' in parse_command:  # M codes
 
-                if 'M' in parse_command:   #      M codes    
-
-                    if parse_command['M'] == '190': # for M190 
+                    if parse_command['M'] == '190':  # for M190
                         self.bed_temp['point'] = int(float(parse_command['S']))
-                        self.append_gcode('M190 S%f' % (self.bed_temp['point']), 2)
+                        self.append_gcode('M190 S%f' %
+                                          (self.bed_temp['point']), 2)
 
-                    elif parse_command['M'] == '109': # for M109
-                        self.extruder_temp['point'] = int(float(parse_command['S']))
-                        self.append_gcode('M109 S%f' %(self.extruder_temp['point']), 3) 
+                    elif parse_command['M'] == '109':  # for M109
+                        self.extruder_temp['point'] = int(
+                            float(parse_command['S']))
+                        self.append_gcode('M109 S%f' %
+                                          (self.extruder_temp['point']), 3)
 
-                    elif parse_command['M'] == '0': # for M0
+                    elif parse_command['M'] == '0':  # for M0
                         pass
 
-                elif 'G' in parse_command:  #      G codes 
-                    
-                    if parse_command['G'] == '1': # for G1
-                        
+                elif 'G' in parse_command:  # G codes
+
+                    if parse_command['G'] == '1':  # for G1
+
                         '''                  find and replace E in Gcode              '''
                         if 'E' in parse_command:
 
@@ -400,9 +404,8 @@ class Machine:
                             parse_command['E'] = str(new_e_pos)
                             command = Parser.rebuild_gcode(parse_command)
 
-
                         '''         find and replace Z in Gcode               '''
-                        '''         this added for simplify              '''                           
+                        '''         this added for simplify              '''
                         if 'Z' in parse_command:
 
                             '''get the last z before the machine trun off'''
@@ -415,24 +418,20 @@ class Machine:
                                 z_pos = z_pos - z_pos_offset
                             self.__current_Z_position = z_pos
                             parse_command['Z'] = str(z_pos)
-                            command = Parser.rebuild_gcode(parse_command)                       
-
+                            command = Parser.rebuild_gcode(parse_command)
 
                         '''         get x position            '''
-                        if 'X' in parse_command: 
+                        if 'X' in parse_command:
                             X_pos = float(parse_command['X'])
-
 
                         '''         get Y position            '''
                         if 'Y' in parse_command:
                             Y_pos = float(parse_command['Y'])
 
-
-                    if parse_command['G'] == '0': # for G0
-
+                    if parse_command['G'] == '0':  # for G0
 
                         '''         find and replace Z in Gcode               '''
-                        '''         this added for cura              '''                           
+                        '''         this added for cura              '''
                         if 'Z' in parse_command:
 
                             '''get the last z before the machine trun off'''
@@ -445,10 +444,7 @@ class Machine:
                                 z_pos = z_pos - z_pos_offset
                             self.__current_Z_position = z_pos
                             parse_command['Z'] = str(z_pos)
-                            command = Parser.rebuild_gcode(parse_command)  
-
-
-
+                            command = Parser.rebuild_gcode(parse_command)
 
                 self.append_gcode(command)
                 command = None
@@ -791,12 +787,10 @@ class Machine:
     def update_filament_status(self):
         self.__update_filament = True
 
-
-
     def find_active_extruders(self):
         ext_num = 0
         while True:
-            self.machine_serial.write(b'T%d'%(ext_num))
+            self.machine_serial.write(b'T%d' % (ext_num))
             data = self.machine_serial.readline().decode('utf-8')
             if data.find('Active'):
                 ext_num += 1
@@ -804,8 +798,5 @@ class Machine:
                 break
         return ext_num
 
-
-
-
-    def select_extruder(self,ext_num):
-        self.append_gcode('T%d'%(ext_num))
+    def select_extruder(self, ext_num):
+        self.append_gcode('T%d' % (ext_num))
