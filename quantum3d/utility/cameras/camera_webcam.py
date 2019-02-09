@@ -35,4 +35,3 @@ class Camera(CameraBase):
                 cam.stop()
         except Exception as e:
             print("webcam camera frames err: ", e)
-            Camera.frames()

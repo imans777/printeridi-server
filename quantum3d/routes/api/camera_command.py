@@ -5,6 +5,9 @@ from quantum3d.utility import Camera, changeCameraTo
 from quantum3d.db import pdb
 from .consts import SC_FULL_PATH
 import os
+import subprocess
+import pygame
+import pygame.camera
 
 
 def getLastFrame(camera):
@@ -41,6 +44,13 @@ def cameraList():
     '''
 
     # TODO: functionality incomplete!
+    pygame.camera.init()
+    webcamlist = pygame.camera.list_cameras()
+
+    vc_out = subprocess.Popen(
+        ['vcgencmd', 'get_camera'], stdout=subprocess.PIPE).communicate()[0]
+    print("vc out is : ", vc_out)
+    
     return jsonify({
         'cameras': [{
             'name': 'Pi-Camera',
@@ -62,6 +72,7 @@ def cameraSet():
             cam: 'pi' | 'webcam' | ...
         }
     '''
+    webcam_list = pygame.camera.list_cameras()
     cam = request.json.get('cam')
     if cam and changeCameraTo(cam):
         return Response(status=200)
@@ -84,6 +95,6 @@ def cameraSaveImage():
 
     Camera().capture(os.path.join(
         SC_FULL_PATH,
-        f + idx + '.jpeg'
+        f + str(idx) + '.jpeg'
     ))
     return Response(status=200)

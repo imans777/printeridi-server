@@ -17,6 +17,7 @@ class PickleDB:
                 'printerpickle.db'
             ), False)
             print("-> pickledb initialized")
+            self.set_key('sc_index', 0)
         except Exception as e:
             print("could not create pickledb connection: ", e)
             self.db = None

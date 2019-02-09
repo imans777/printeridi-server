@@ -11,8 +11,8 @@ except ImportError:
 
 class CameraEvent(object):
     '''
-      An event-like class signaling all actie clients
-      when a new frame is available
+      An event-like class signaling all active
+      clients when a new frame is available
     '''
 
     def __init__(self):
