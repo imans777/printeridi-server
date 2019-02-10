@@ -23,6 +23,8 @@ else:
 
 
 def changeCameraTo(cam):
+    # TODO: this doesn't work as expected!
+    # maybe a dictionary of cameras' a better idea?
     ''' this changes the Camera object to a desired camera '''
     global Camera
     try:

@@ -6,9 +6,9 @@ if __name__ == '__main__':
     sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     # print('realpath: ', os.path.dirname(os.path.realpath(__file__)))
     # TODO: Maybe also need to set PYTHONPATH!
-    # TODO: SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D) (for the prints to be organized)
-    # TODO: SHOULD HAVE AN EXCEPTION CLASS!
-    # TODO: what if we implement Socket, but still use app.run?! will sockets work in that way?
+    # SHOULD CREATE A PRINT SERVICE, CLASS OR SOMETHING! (WHAT? :D) (for the prints to be organized)
+    # SHOULD HAVE AN EXCEPTION CLASS!
+    # what if we implement Socket, but still use app.run?! will sockets work in that way?
 
     # Main app
     from quantum3d import printer_app
@@ -32,6 +32,10 @@ if __name__ == '__main__':
     # Used alongside socket
     from quantum3d import socketio
     print('-> App is now running! <-')
+
+    # TODO: set debug to false
+    # and run on gevent webserver for
+    # high streaming, etc. enhancement!
     socketio.run(printer_app,
                  host='0.0.0.0',
                  port=80,

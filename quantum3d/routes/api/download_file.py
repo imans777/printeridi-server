@@ -6,6 +6,7 @@ import os
 from os.path import join
 
 # TODO: the question is how the client should know which 'path' to request?
+# (only screenshots left)
 
 
 @app.route('/download/<path:folder>/<path:path>')
