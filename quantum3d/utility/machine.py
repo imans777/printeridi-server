@@ -127,7 +127,7 @@ class Machine:
             self.number_of_extruder = self.find_active_extruders()
 
             '''    create a temp var for each toolhead    '''
-            for i in range(self.number_of_extruder):
+            for _ in range(self.number_of_extruder):
                 temps = {'current': 0, 'point': 0}
                 self.extruders_temp.append(temps)
 
@@ -507,6 +507,7 @@ class Machine:
         # IMAN -> ADDED FOLLOWING LINE FOR DELETING BACK UP FILES
         self.delete_last_print_files()
         self.on_the_print_page = False
+        self.print_percentage = 0
         self.printing_file = None
 
         print_info = (new_print['time'], new_print['temperature'],

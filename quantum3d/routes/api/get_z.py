@@ -13,5 +13,7 @@ def get_z():
             z: Integer
         }
     """
+    if not printer.on_the_print_page:
+        abort(403)
     z = printer.get_current_Z_position()
     return jsonify({'z': z}), 200

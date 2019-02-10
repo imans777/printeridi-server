@@ -14,5 +14,7 @@ def get_time():
             status: Integer,
         }
     """
+    if not printer.on_the_print_page:
+        abort(403)
     time_read = printer.time.read()
     return jsonify({'time': time_read}), 200

@@ -70,6 +70,8 @@ def printing():
         elif action == 'pause':
             printer.pause_printing()
         elif action == 'percentage':
+            if not printer.on_the_print_page:
+                abort(403)
             percentage = printer.get_percentage()
         elif action == 'unfinished':
             cfup = printer.check_for_unfinished_print()
