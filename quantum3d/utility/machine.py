@@ -124,7 +124,8 @@ class Machine:
                     break
 
             '''           find active toolheads           '''
-            self.number_of_extruder = self.find_active_extruders()
+            # TODO: BUGGISH CODE -> stays in infinite loop
+            # self.number_of_extruder = self.find_active_extruders()
 
             '''    create a temp var for each toolhead    '''
             for _ in range(self.number_of_extruder):
