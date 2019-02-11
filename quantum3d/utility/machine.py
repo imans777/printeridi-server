@@ -508,7 +508,6 @@ class Machine:
         # IMAN -> ADDED FOLLOWING LINE FOR DELETING BACK UP FILES
         self.delete_last_print_files()
         self.on_the_print_page = False
-        self.print_percentage = 0
         self.printing_file = None
 
         print_info = (new_print['time'], new_print['temperature'],
