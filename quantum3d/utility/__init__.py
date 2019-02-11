@@ -29,7 +29,6 @@ def changeCameraTo(cam):
     # maybe a dictionary of cameras' a better idea?
     ''' this changes the Camera object to a desired camera '''
     global Camera
-    global selectedCamera
     try:
         if cam == 'pi':
             pdb.set_key('selected_camera', 'pi')

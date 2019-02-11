@@ -9,8 +9,7 @@ class Camera(CameraBase):
     cameraObj = None
     selected_camera = '/dev/video0'
 
-    def __init__(self, selected_camera='/dev/video0'):
-        Camera.selected_camera = selected_camera
+    def __init__(self):
 
     @staticmethod
     def capture(dest, resize=(640, 480)):

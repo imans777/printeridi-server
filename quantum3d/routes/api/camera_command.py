@@ -1,7 +1,7 @@
 
 from flask import request, Response, current_app, abort, json, jsonify
 from quantum3d.routes import api_bp as app
-from quantum3d.utility import Camera, changeCameraTo, selectedCamera
+from quantum3d.utility import Camera, changeCameraTo
 from quantum3d.db import pdb
 from .consts import SC_FULL_PATH
 import os
@@ -39,7 +39,7 @@ def cameraList():
         Response: {
             cameras: {
                 name: string,           # the displayed name of the camera
-                link: string,           # the link used in changeCameraTo function
+                link: string,           # the link used in changeCameraTo function (pi, webcam0, webcam1, ...)
                 icon: string            # custom icon for different cameras
             }[]
         }
@@ -104,7 +104,8 @@ def cameraSaveImage():
     f = f.split('.')[0].split('/')[-1]
     pdb.set_key('sc_index', idx + 1)
 
-    Camera[selectedCamera]().capture(os.path.join(
+    cam = pdb.get_key('selected_camera')
+    Camera[cam]().capture(os.path.join(
         SC_FULL_PATH,
         f + str(idx) + '.jpeg'
     ))
