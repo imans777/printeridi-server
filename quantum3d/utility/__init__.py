@@ -12,14 +12,27 @@ from .print_time import Time
 from .extended_board import ExtendedBoard
 
 # import camera driver
+
+
+def get_camera_list():
+    ''' retreive camera list (except rasp pi) '''
+    import pygame
+    import pygame.camera
+    pygame.init()
+    pygame.camera.init()
+    cams = pygame.camera.list_cameras()
+    return cams
+
+
 import os
 from importlib import import_module
-Camera = None
-if os.environ.get('CAMERA'):
-    Camera = import_module(
-        '.cameras.camera_' + os.environ['CAMERA'], package='quantum3d.utility').Camera
-else:
-    print("!! Camera not found")
+from .cameras.camera_pi import Camera as CameraPi
+from .cameras.camera_webcam import Camera as CameraWebcam
+
+Camera = {}
+Camera['pi'] = CameraPi
+Camera['webcam'] = CameraWebcam
+selectedCamera = 'pi'
 
 
 def changeCameraTo(cam):
@@ -27,13 +40,14 @@ def changeCameraTo(cam):
     # maybe a dictionary of cameras' a better idea?
     ''' this changes the Camera object to a desired camera '''
     global Camera
+    global selectedCamera
     try:
-        if cam == 'pi' or cam == 'webcam':
-            Camera = import_module('.cameras.camera_' + cam,
-                                   package='quantum3d.utility').Camera
-        else:  # unsupported camera
-            Camera = import_module('.cameras.camera_base',
-                                   package='quantum3d.utility').CameraBase
+        if cam == 'pi':
+            selectedCamera = 'pi'
+        elif 'webcam' in cam:
+            Camera['webcam'].selected_camera = int(cam[len('webcam'):])
+            selectedCamera = cam
+        else:
             return False
     except:
         return False
@@ -43,3 +57,4 @@ def changeCameraTo(cam):
 # use this objects to work with utility
 printer = Machine()
 extra = Extra()
+print("-> Machine initialized")

@@ -7,6 +7,10 @@ import time
 
 class Camera(CameraBase):
     cameraObj = None
+    selected_camera = '/dev/video0'
+
+    def __init__(self, selected_camera='/dev/video0'):
+        Camera.selected_camera = selected_camera
 
     @staticmethod
     def capture(dest, resize=(640, 480)):
@@ -23,9 +27,7 @@ class Camera(CameraBase):
                 pygame.init()
                 pygame.camera.init()
                 cams = pygame.camera.list_cameras()
-                print("camera list : ", cams)
-                cam = pygame.camera.Camera(cams[0])
-
+                cam = pygame.camera.Camera(cams[Camera.selected_camera or 0])
                 cam.start()
                 Camera.camerObj = cam
 

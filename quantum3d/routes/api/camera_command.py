@@ -1,7 +1,7 @@
 
 from flask import request, Response, current_app, abort, json, jsonify
 from quantum3d.routes import api_bp as app
-from quantum3d.utility import Camera, changeCameraTo
+from quantum3d.utility import Camera, changeCameraTo, selectedCamera
 from quantum3d.db import pdb
 from .consts import SC_FULL_PATH
 import os
@@ -26,7 +26,7 @@ def cameraFeed():
     '''
         receives feed from the selected camera
     '''
-    return Response(generateCameraFeed(Camera()),
+    return Response(generateCameraFeed(Camera[selectedCamera]()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -56,6 +56,7 @@ def cameraList():
         camlist.append('pi')
 
     res = {'cameras': []}
+    idx = 0
     for item in camlist:
         if item == 'pi':
             res['cameras'].append({
@@ -66,9 +67,10 @@ def cameraList():
         else:
             res['cameras'].append({
                 'name': 'Webcam',
-                'link': 'webcam',
+                'link': 'webcam' + str(idx),
                 'icon': '/static/assets/webcam.png'
             })
+            idx += 1
     return jsonify(res)
 
 
@@ -77,7 +79,7 @@ def cameraSet():
     '''
         sets the feeding camera to the requested one
         Request: {
-            cam: 'pi' | 'webcam' | ...
+            cam: 'pi' | 'webcam' | 'webcam1' | 'webcam2' | ...
         }
     '''
     cam = request.json.get('cam')
@@ -100,7 +102,7 @@ def cameraSaveImage():
     f = f.split('.')[0].split('/')[-1]
     pdb.set_key('sc_index', idx + 1)
 
-    Camera().capture(os.path.join(
+    Camera[selectedCamera]().capture(os.path.join(
         SC_FULL_PATH,
         f + str(idx) + '.jpeg'
     ))
