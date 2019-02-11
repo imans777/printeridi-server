@@ -67,11 +67,12 @@ def cameraList():
                 'icon': '/static/assets/rpicamera.png'
             })
         else:
-            res['cameras'].append({
-                'name': 'Webcam',
-                'link': 'webcam' + str(idx),
-                'icon': '/static/assets/webcam.png'
-            })
+            # TODO: for now the show code is not working!
+            # res['cameras'].append({
+            #     'name': 'Webcam',
+            #     'link': 'webcam' + str(idx),
+            #     'icon': '/static/assets/webcam.png'
+            # })
             idx += 1
     return jsonify(res)
 

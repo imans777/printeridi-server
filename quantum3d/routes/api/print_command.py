@@ -3,6 +3,7 @@ import time
 
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import printer
+from quantum3d.db import pdb
 
 
 @app.route('/print', methods=['DELETE', 'POST'])
@@ -57,6 +58,7 @@ def printing():
                 printer.start_printing_thread(gcode_dir=gcode_file_address)
             # TODO: put the file inside uploads files and print from there to avoid usb crash, etc.!
         elif action == 'stop':
+            pdb.set_key('is_paused', 0)
             printer.stop_printing()
             printer.delete_last_print_files()
             ''' wait until the buffer becomes free '''
@@ -66,8 +68,10 @@ def printing():
             printer.cooldown_bed()
             printer.stop_move_up()
         elif action == 'resume':
+            pdb.set_key('is_paused', 0)
             printer.resume_printing()
         elif action == 'pause':
+            pdb.set_key('is_paused', 1)
             printer.pause_printing()
         elif action == 'percentage':
             if not printer.on_the_print_page:

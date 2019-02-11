@@ -50,4 +50,5 @@ PICKLE_KEYS = [
     'gcode_downloadable_link',
     'sc_index',
     'selected_camera',
+    'is_paused',
 ]

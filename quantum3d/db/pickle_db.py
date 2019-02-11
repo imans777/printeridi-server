@@ -17,10 +17,14 @@ class PickleDB:
                 'printerpickle.db'
             ), False)
             print("-> pickledb initialized")
-            self.set_key('sc_index', 0)
+            self._init_values()
         except Exception as e:
             print("could not create pickledb connection: ", e)
             self.db = None
+
+    def _init_values(self):
+        self.set_key('sc_index', 0)
+        self.set_key('is_paused', 0)
 
     @error_handler_with(pickle_message)
     def get_key(self, key):
