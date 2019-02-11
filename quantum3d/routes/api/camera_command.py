@@ -26,7 +26,9 @@ def cameraFeed():
     '''
         receives feed from the selected camera
     '''
-    return Response(generateCameraFeed(Camera[selectedCamera]()),
+    cam = pdb.get_key('selected_camera')
+    print("Camera '{}' is about to show".format(cam))
+    return Response(generateCameraFeed(Camera[cam]()),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 

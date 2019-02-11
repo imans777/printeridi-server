@@ -48,5 +48,6 @@ PICKLE_KEYS = [
     'theme',
     'print_file_dir',
     'gcode_downloadable_link',
-    'sc_index'
+    'sc_index',
+    'selected_camera',
 ]

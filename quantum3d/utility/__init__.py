@@ -11,28 +11,17 @@ from .raspberry_hardware_info import RaspberryHardwareInfo
 from .print_time import Time
 from .extended_board import ExtendedBoard
 
+from quantum3d.db import pdb
+
 # import camera driver
-
-
-def get_camera_list():
-    ''' retreive camera list (except rasp pi) '''
-    import pygame
-    import pygame.camera
-    pygame.init()
-    pygame.camera.init()
-    cams = pygame.camera.list_cameras()
-    return cams
-
-
 import os
-from importlib import import_module
 from .cameras.camera_pi import Camera as CameraPi
 from .cameras.camera_webcam import Camera as CameraWebcam
 
 Camera = {}
 Camera['pi'] = CameraPi
 Camera['webcam'] = CameraWebcam
-selectedCamera = 'pi'
+pdb.set_key('selected_camera', '')
 
 
 def changeCameraTo(cam):
@@ -43,10 +32,10 @@ def changeCameraTo(cam):
     global selectedCamera
     try:
         if cam == 'pi':
-            selectedCamera = 'pi'
+            pdb.set_key('selected_camera', 'pi')
         elif 'webcam' in cam:
             Camera['webcam'].selected_camera = int(cam[len('webcam'):])
-            selectedCamera = cam
+            pdb.set_key('selected_camera', 'webcam')
         else:
             return False
     except:
