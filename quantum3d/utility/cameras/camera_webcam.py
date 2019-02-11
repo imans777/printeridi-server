@@ -1,6 +1,7 @@
 from .camera_base import CameraBase
 import pygame
 import pygame.camera
+from pygame.locals import *
 import time
 
 
