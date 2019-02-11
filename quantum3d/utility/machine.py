@@ -12,7 +12,7 @@ import os
 from .print_time import Time
 from .extended_board import ExtendedBoard
 from quantum3d.db import db
-from .parser import Parser
+from .gcode_parser import GCodeParser
 
 # global consts (also exists on routes/api/consts.py)
 BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
@@ -257,7 +257,7 @@ class Machine:
 
         ''' read files lines'''
         for line in gcode_file:
-            lines.append(Parser.remove_chomp(line))
+            lines.append(GCodeParser.remove_chomp(line))
 
         '''hibernate mode'''
         if line_to_go != 0:
@@ -266,7 +266,7 @@ class Machine:
 
             '''get the extruder temp from the gcode'''
             for line in lines:
-                parse_line = Parser.parse(line)
+                parse_line = GCodeParser.parse(line)
                 if 'M' in parse_line:
                     if parse_line['M'] == '190':
                         if 'T' in parse_line:
@@ -284,7 +284,7 @@ class Machine:
 
             '''get the bed temp from the gcode'''
             for line in lines:
-                parse_line = Parser.parse(line)
+                parse_line = GCodeParser.parse(line)
                 if 'M' in parse_line:
                     if parse_line['M'] == '190':
                         self.bed_temp['point'] = int(float(parse_line['S']))
@@ -360,7 +360,7 @@ class Machine:
                     backup_print.close()
 
             else:
-                command = Parser.remove_comment(lines[x])
+                command = GCodeParser.remove_comment(lines[x])
                 # lines[x][:-(len(lines[x]) - signnum)]
 
             '''gcode sending to printer'''
@@ -368,7 +368,7 @@ class Machine:
 
                 ''' use command '''
 
-                parse_command = Parser.parse(command)
+                parse_command = GCodeParser.parse(command)
 
                 if 'M' in parse_command:  # M codes
 
@@ -402,7 +402,7 @@ class Machine:
                             if line_to_go != 0:
                                 new_e_pos = new_e_pos - e_pos_offset
                             parse_command['E'] = str(new_e_pos)
-                            command = Parser.rebuild_gcode(parse_command)
+                            command = GCodeParser.rebuild_gcode(parse_command)
 
                         '''         find and replace Z in Gcode               '''
                         '''         this added for simplify              '''
@@ -418,7 +418,7 @@ class Machine:
                                 z_pos = z_pos - z_pos_offset
                             self.__current_Z_position = z_pos
                             parse_command['Z'] = str(z_pos)
-                            command = Parser.rebuild_gcode(parse_command)
+                            command = GCodeParser.rebuild_gcode(parse_command)
 
                         '''         get x position            '''
                         if 'X' in parse_command:
@@ -444,7 +444,7 @@ class Machine:
                                 z_pos = z_pos - z_pos_offset
                             self.__current_Z_position = z_pos
                             parse_command['Z'] = str(z_pos)
-                            command = Parser.rebuild_gcode(parse_command)
+                            command = GCodeParser.rebuild_gcode(parse_command)
 
                 self.append_gcode(command)
                 command = None

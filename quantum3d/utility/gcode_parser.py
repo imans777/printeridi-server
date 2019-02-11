@@ -4,7 +4,7 @@ import collections
 import codecs
 
 
-class Parser:
+class GCodeParser:
     @staticmethod
     def remove_comment(gcode):
         gcode = gcode.split(';')
