@@ -33,6 +33,12 @@ if __name__ == '__main__':
     from quantum3d import socketio
     print('-> App is now running! <-')
 
+    # TODO: run `curl localhost` locally to see that the connection is active or not!
+    # if it's not, the following should be checked:
+    # - 'sudo ufw allow 80' for firewall!
+    # - 'netstat -tupln | grep ":80"' to see if the server is really listening!
+    # - 'iptables -I INPUT -p tcp --dport 80 -j ACCEPT' to let the packets through!
+
     # TODO: set debug to false
     # and run on gevent webserver for
     # high streaming, etc. enhancement!
