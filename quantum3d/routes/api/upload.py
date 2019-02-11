@@ -61,7 +61,7 @@ def deleteFile(path):
         abort(404)
 
     # there should not be os separator to be used for directories
-    if os.path.sep in path or ['/', '\\'] in path:
+    if os.path.sep in path or '/' in path or '\\' in path:
         abort(404)
 
     # file should exist and should be of file type
