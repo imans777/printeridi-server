@@ -39,9 +39,14 @@ def printing():
         percentage = 0
 
         if action == 'print':
+            if printer.on_the_print_page:
+                abort(403)
+
             ''' refresh the  ext board buffer to able get the filament error '''
-            # printer.ext_board_flush_input_buffer()
-            # printer.ext_board_off_A_flag()
+            if printer.use_ext_board:
+                printer.ext_board.flush_input_buffer()
+                printer.ext_board.off_A_flag()
+
             ''' delete last printed back up files '''
             printer.delete_last_print_files()
             gcode_file_address = req['cd']
@@ -58,6 +63,9 @@ def printing():
                 printer.start_printing_thread(gcode_dir=gcode_file_address)
             # TODO: put the file inside uploads files and print from there to avoid usb crash, etc.!
         elif action == 'stop':
+            if not printer.on_the_print_page:
+                abort(403)
+
             pdb.set_key('is_paused', 0)
             printer.stop_printing()
             printer.delete_last_print_files()
@@ -68,16 +76,26 @@ def printing():
             printer.cooldown_bed()
             printer.stop_move_up()
         elif action == 'resume':
+            if not printer.on_the_print_page:
+                abort(403)
+
             pdb.set_key('is_paused', 0)
             printer.resume_printing()
         elif action == 'pause':
+            if not printer.on_the_print_page:
+                abort(403)
+
             pdb.set_key('is_paused', 1)
             printer.pause_printing()
         elif action == 'percentage':
             if not printer.on_the_print_page:
                 abort(403)
+
             percentage = printer.get_percentage()
         elif action == 'unfinished':
+            if printer.on_the_print_page:
+                abort(403)
+
             cfup = printer.check_for_unfinished_print()
             if cfup[0] == True:
                 return jsonify({
