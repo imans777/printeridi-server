@@ -714,8 +714,9 @@ class Machine:
     def resume_printing(self):
         self.__pause_flag = False
         self.__filament_pause_flag = False
-        self.ext_board.flush_input_buffer()
-        self.ext_board.off_A_flag()
+        if self.use_ext_board:
+            self.ext_board.flush_input_buffer()
+            self.ext_board.off_A_flag()
 
     def get_percentage(self):
         return self.print_percentage
