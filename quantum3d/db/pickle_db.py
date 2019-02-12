@@ -7,6 +7,7 @@ __copyright__ = "Copyright (C) 2019 Iman Sahebi - Released under terms of the MI
 import pickledb
 import os
 from .error_handler import error_handler_with, pickle_message
+from quantum3d.constants import PrintStatus, PICKLE_KEYS
 
 
 class PickleDB:
@@ -24,14 +25,20 @@ class PickleDB:
 
     def _init_values(self):
         self.set_key('sc_index', 0)
-        self.set_key('is_paused', 0)
+        self.set_key('print_status', PrintStatus.IDLE.value)
 
     @error_handler_with(pickle_message)
     def get_key(self, key):
+        if key not in PICKLE_KEYS:
+            raise "KEY NOT KNOWN!"
+
         return self.db.get(key)
 
     @error_handler_with(pickle_message)
     def set_key(self, key, value):
+        if key not in PICKLE_KEYS:
+            raise "KEY NOT KNOWN!"
+
         cond1 = self.db.set(key, value)
         cond2 = self.db.dump()
         return cond1 and cond2

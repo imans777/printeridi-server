@@ -1,7 +1,7 @@
 from flask import request, Response, json, jsonify, abort
 
 from quantum3d.routes import api_bp as app
-from .consts import PICKLE_KEYS
+from quantum3d.constants import PICKLE_KEYS
 from quantum3d.db import pdb
 import os
 

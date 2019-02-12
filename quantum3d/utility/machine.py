@@ -13,16 +13,7 @@ from .print_time import Time
 from .extended_board import ExtendedBoard
 from quantum3d.db import db
 from .gcode_parser import GCodeParser
-
-# global consts (also exists on routes/api/consts.py)
-BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
-UPLOAD_PROTOCOL = 'upload://'
-UPLOAD_FULL_PATH = os.path.join(
-    os.getcwd(),
-    os.environ['FLASK_APP'] or 'quantum3d',
-    os.environ['UPLOAD_FOLDER'] or 'uploads',
-    'files'
-)
+from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
 
 
 class Machine:
@@ -242,15 +233,13 @@ class Machine:
         self.z_pos_offset = 0
         self.__stop_flag = False
         self.__pause_flag = False
+        self.on_the_print_page = True
         command = None
         z_pos_offset = 0
         e_pos_offset = 0
         self.__current_Z_position = 0
         gcode_file = codecs.open(gcode_file_path, 'r')
         lines = []
-
-        '''      here       '''
-        self.on_the_print_page = True
 
         '''get a backup from gcode file path for hibernate '''
         with open('backup_print_path.bc', 'w') as backup_print:
@@ -698,9 +687,12 @@ class Machine:
         print('@@@ printing file dir:', gcode_dir)
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
+
+        ''' refresh the  ext board buffer to able get the filament error '''
         if self.use_ext_board:
             self.ext_board.flush_input_buffer()
             self.ext_board.off_A_flag()
+
         read_file_gcode_lines_thread.start()
         print('started')
 

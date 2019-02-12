@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 
 from quantum3d.routes import api_bp as app
 from quantum3d.db import db
-from .consts import ALLOWED_EXTENSIONS, UPLOAD_FULL_PATH
+from quantum3d.constants import ALLOWED_EXTENSIONS, UPLOAD_FULL_PATH
 
 
 def allowed_file(filename):

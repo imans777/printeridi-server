@@ -4,6 +4,7 @@ import time
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import printer
 from quantum3d.db import pdb
+from quantum3d.constants import PrintStatus
 
 
 @app.route('/print', methods=['DELETE', 'POST'])
@@ -42,11 +43,6 @@ def printing():
             if printer.on_the_print_page:
                 abort(403)
 
-            ''' refresh the  ext board buffer to able get the filament error '''
-            if printer.use_ext_board:
-                printer.ext_board.flush_input_buffer()
-                printer.ext_board.off_A_flag()
-
             ''' delete last printed back up files '''
             printer.delete_last_print_files()
             gcode_file_address = req['cd']
@@ -61,12 +57,12 @@ def printing():
                 )
             else:
                 printer.start_printing_thread(gcode_dir=gcode_file_address)
-            # TODO: put the file inside uploads files and print from there to avoid usb crash, etc.!
+            # TODO: maybe put the file inside uploads folder and print from there to avoid usb crash, etc.!
         elif action == 'stop':
             if not printer.on_the_print_page:
                 abort(403)
 
-            pdb.set_key('is_paused', 0)
+            pdb.set_key('print_status', PrintStatus.IDLE.value)
             printer.stop_printing()
             printer.delete_last_print_files()
             ''' wait until the buffer becomes free '''
@@ -79,13 +75,13 @@ def printing():
             if not printer.on_the_print_page:
                 abort(403)
 
-            pdb.set_key('is_paused', 0)
+            pdb.set_key('print_status', PrintStatus.PRINTING.value)
             printer.resume_printing()
         elif action == 'pause':
             if not printer.on_the_print_page:
                 abort(403)
 
-            pdb.set_key('is_paused', 1)
+            pdb.set_key('print_status', PrintStatus.PAUSED.value)
             printer.pause_printing()
         elif action == 'percentage':
             percentage = printer.get_percentage()

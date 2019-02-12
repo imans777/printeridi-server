@@ -1,7 +1,7 @@
 from flask import request, Response, json, jsonify, abort
 
 from quantum3d.routes import api_bp as app
-from .consts import LANGUAGE_FOLDER_FULL_PATH
+from quantum3d.constants import LANGUAGE_FOLDER_FULL_PATH
 from quantum3d.db import pdb
 import os
 

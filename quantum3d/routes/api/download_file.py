@@ -1,7 +1,7 @@
 
 from flask import current_app, send_from_directory, abort
 from quantum3d.routes import api_bp as app
-from .consts import BASE_FULL_UPLOAD, VALID_FOLDERS, USBS
+from quantum3d.constants import BASE_FULL_UPLOAD, VALID_FOLDERS, USBS
 import os
 from os.path import join
 

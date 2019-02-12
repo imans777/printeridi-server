@@ -4,7 +4,11 @@ __license__ = "The MIT License <http://opensource.org/licenses/MIT>"
 __copyright__ = "Copyright (C) 2018 Iman Sahebi - Released under terms of the MIT License"
 
 import os
-RESERVED_NAMES = ['consts']
+
+# create a reserved list for the files that
+# we don't want to import them in this way!
+RESERVED_NAMES = []
+
 try:
     package = os.environ['FLASK_APP'].strip()
 except:

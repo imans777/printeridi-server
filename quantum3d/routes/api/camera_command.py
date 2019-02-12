@@ -3,7 +3,7 @@ from flask import request, Response, current_app, abort, json, jsonify
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import Camera, changeCameraTo
 from quantum3d.db import pdb
-from .consts import SC_FULL_PATH
+from quantum3d.constants import SC_FULL_PATH
 import os
 import subprocess
 import pygame
