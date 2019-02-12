@@ -88,9 +88,6 @@ def printing():
             pdb.set_key('is_paused', 1)
             printer.pause_printing()
         elif action == 'percentage':
-            if not printer.on_the_print_page:
-                abort(403)
-
             percentage = printer.get_percentage()
         elif action == 'unfinished':
             if printer.on_the_print_page:
