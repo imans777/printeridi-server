@@ -34,6 +34,7 @@ class Machine:
         self.is_locked = False
         self.printing_file = None  # When printing started, it will set to filename
         self.pin = None  # When locked, it will be set, when unlocked, it is None
+        self.fan = 0  # stores the fan status (0: off | 0.5: half | 1: on)
 
         try:
             settings = db.get_settings()
@@ -94,7 +95,7 @@ class Machine:
             self.ext_board = ExtendedBoard()
             self.use_ext_board = True
         except BaseException as e:
-            print(e)
+            print("start machine connection error: ", e)
             self.use_ext_board = False
 
         try:
@@ -158,14 +159,20 @@ class Machine:
                               (self.__relay_state[0], self.__relay_state[1]))
 
                 if self.__Gcodes_to_run:
-                    print('send to machine', ('%s%s' %
-                                              (self.__Gcodes_to_run[0], '\n')).encode('utf-8'))
-                    self.machine_serial.write(
-                        (self.__Gcodes_to_run[0] + '\n').encode('utf-8'))
+                    gcode_line = (
+                        self.__Gcodes_to_run[0] + '\n').encode('utf-8')
+                    print('send to machine', gcode_line)
+                    self.machine_serial.write(gcode_line)
                     if self.__Gcodes_return[0] == 0:
                         while self.machine_serial.readline() != 'ok\n'.encode('utf-8'):
                             pass
                         first_done = True
+
+                    # check fan changes in the run gcode line
+                    if 'M106' in str(gcode_line):
+                        self.fan = 1
+                    elif 'M107' in str(gcode_line):
+                        self.fan = 0
 
                     elif self.__Gcodes_return[0] == 1:
                         '''retrun temp'''
@@ -209,7 +216,6 @@ class Machine:
                         first_done = True
 
                     if first_done:
-                        print('in first done')
                         self.__Gcodes_to_run.pop(0)
                         self.__Gcodes_return.pop(0)
                         first_done = False
@@ -303,7 +309,7 @@ class Machine:
                             '''get the direct gcode line (the past value was the layer that has been printed)'''
                             line_to_go = i
                 except Exception as e:
-                    print('error in find line :', e)
+                    print('error in find line: ', e)
 
             '''send the nozzle to the correct position to start printing'''
             self.append_gcode('G91')
@@ -519,7 +525,6 @@ class Machine:
         """
         self.__Gcodes_to_run.append(gcode)
         self.__Gcodes_return.append(gcode_return)
-        print('Gcodes to Run:', self.__Gcodes_to_run)
 
     ''' Methods to control the printer '''
 
@@ -553,10 +558,13 @@ class Machine:
         """
         if status == 'ON':
             self.append_gcode('M106 S255')
+            self.fan = 1
         elif status == 'Half':
             self.append_gcode('M106 S127')
+            self.fan = 0.5
         elif status == 'OFF':
             self.append_gcode('M107')
+            self.fan = 0
 
     def move_axis(self, axis, positioning_mode, value):
         """
@@ -745,7 +753,7 @@ class Machine:
             backup_print_path = open('backup_print_path.bc', 'r')
             backup_file_path = backup_print_path.readline()
             backup_line = int(backup_print.readline())
-            print(backup_line)
+            print("backup line: ", backup_line)
             backup_print.close()
             backup_print_path.close()
             return True, [backup_file_path, backup_line]
@@ -757,7 +765,7 @@ class Machine:
             os.remove('backup_print.bc')
             os.remove('backup_print_path.bc')
         except:
-            print("file not removed !")
+            print("file not removed!")
 
     def stop_move_up(self):
         self.append_gcode('G91')
