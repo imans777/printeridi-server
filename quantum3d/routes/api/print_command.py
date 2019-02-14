@@ -1,10 +1,11 @@
 from flask import request, json, Response, jsonify, abort
 import time
+import os
 
 from quantum3d.routes import api_bp as app
-from quantum3d.utility import printer
+from quantum3d.utility import printer, Utils
 from quantum3d.db import pdb
-from quantum3d.constants import PrintStatus
+from quantum3d.constants import PrintStatus, UPLOAD_PROTOCOL
 
 
 @app.route('/print', methods=['DELETE', 'POST'])
@@ -45,11 +46,31 @@ def printing():
 
             ''' delete last printed back up files '''
             printer.delete_last_print_files()
+
             gcode_file_address = req['cd']
+
+            # set file dir in db
+            pdb.set_key('print_file_dir', gcode_file_address)
+
+            # set gcode link in db
+            # TODO: change this to localhost
+            ip = Utils.get_ip_list()
+            if len(ip):
+                gcode_file_link = 'http://{}/api/download/'.format(ip[0])
+            else:
+                gcode_file_link = 'http://localhost/api/download/'
+                print("could not get IP list!!!")
+
             if printer.base_path in gcode_file_address:
                 gcode_file_address = gcode_file_address[
                     len(printer.base_path)+1:
                 ]
+                gcode_file_link += 'usbs/' + gcode_file_address
+            else:
+                gcode_file_link += 'files/' + \
+                    gcode_file_address[len(UPLOAD_PROTOCOL):]
+            pdb.set_key('gcode_downloadable_link', gcode_file_link)
+
             if 'line' in req:
                 printer.start_printing_thread(
                     gcode_dir=gcode_file_address,
