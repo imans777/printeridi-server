@@ -14,11 +14,6 @@ def get_temperature():
             ext: {cur: number, goal: number}
         }
     """
-    # TODO: this line should be called by the machine class
-    # on a e.g. 2-seconds interval, so if multiple users
-    # are active, we don't send M105 for each of them!
-    printer.refresh_temp()
-
     bed_temp = printer.get_bed_temp()
     ext_temp = printer.get_extruder_temp()
     data = {

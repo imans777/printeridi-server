@@ -78,6 +78,9 @@ class Machine:
         # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
+        # send M105 (on a X-second interval) to machine to update temperature values
+        self.refresh_temp_interval()
+
     def get_bed_temp(self):
         return self.bed_temp
 
@@ -680,6 +683,12 @@ class Machine:
 
     def refresh_temp(self):
         self.append_gcode('M105', 1)
+
+    def refresh_temp_interval(self):
+        t = threading.Timer(2, self.refresh_temp_interval)
+        t.daemon = True
+        t.start()
+        self.refresh_temp()
 
     ''' print '''
 
