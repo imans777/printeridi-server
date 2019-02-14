@@ -140,7 +140,6 @@ class Machine:
         first_done = False
         while True:
             try:
-
                 if self.use_ext_board:
                     if self.__update_filament:
                         '''   check for existance of filament   '''
@@ -168,24 +167,24 @@ class Machine:
                             pass
                         first_done = True
 
-                        # check fan changes in the run gcode li
-                        try:
-                            if 'M106' in str(gcode_line):
-                                self.fan = 1
-                            elif 'M107' in str(gcode_line):
-                                self.fan = 0
-                        except Exception as e:
-                            print("setting fan error: ", e)
+                        # check fan changes in the run gcode line
+                        if 'M106' in str(gcode_line):
+                            self.fan = 1
+                        elif 'M107' in str(gcode_line):
+                            self.fan = 0
 
                     elif self.__Gcodes_return[0] == 1:
-                        '''retrun temp'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        splited = data.split(' ')
-                        self.extruder_temp['current'] = float(splited[1][2:])
-                        self.extruder_temp['point'] = float(splited[2][1:])
-                        self.bed_temp['current'] = float(splited[3][2:])
-                        self.bed_temp['point'] = float(splited[4][1:])
-
+                        '''return temp'''
+                        try:
+                            data = self.machine_serial.readline().decode('utf-8')
+                            splited = data.split(' ')
+                            self.extruder_temp['current'] = float(
+                                splited[1][2:])
+                            self.extruder_temp['point'] = float(splited[2][1:])
+                            self.bed_temp['current'] = float(splited[3][2:])
+                            self.bed_temp['point'] = float(splited[4][1:])
+                        except Exception as e:
+                            print("error setting temperatures: ", e)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 2:
@@ -226,6 +225,7 @@ class Machine:
                 print('error in gcode handler!', ex)
                 self.Gcode_handler_error_logs.append(ex)
                 if len(self.Gcode_handler_error_logs) > 9:
+                    print("TOO MUCH ERROR! EXITING...")
                     break
 
     def __read_file_gcode_lines(self, gcode_file_path, line_to_go=0):
