@@ -43,72 +43,29 @@ def printing():
         if action == 'print':
             if printer.on_the_print_page:
                 abort(403)
+            print_start(req)
 
-            ''' delete last printed back up files '''
-            printer.delete_last_print_files()
-
-            gcode_file_address = req['cd']
-
-            # set file dir in db
-            pdb.set_key('print_file_dir', gcode_file_address)
-
-            # set gcode link in db
-            ip = Utils.get_ip_list()
-            if len(ip):
-                gcode_file_link = 'http://{}/api/download/'.format(ip[0])
-            else:
-                gcode_file_link = 'http://localhost/api/download/'
-                print("could not get IP list!!!")
-
-            if printer.base_path in gcode_file_address:
-                gcode_file_address = gcode_file_address[
-                    len(printer.base_path)+1:
-                ]
-                gcode_file_link += 'usbs/' + gcode_file_address
-            else:
-                gcode_file_link += 'files/' + \
-                    gcode_file_address[len(UPLOAD_PROTOCOL):]
-            pdb.set_key('gcode_downloadable_link', gcode_file_link)
-
-            if 'line' in req:
-                printer.start_printing_thread(
-                    gcode_dir=gcode_file_address,
-                    line=req['line']
-                )
-            else:
-                printer.start_printing_thread(gcode_dir=gcode_file_address)
-            # TODO: maybe put the file inside uploads folder and print from there to avoid usb crash, etc.!
         elif action == 'stop':
             if not printer.on_the_print_page:
                 abort(403)
+            print_stop()
 
-            pdb.set_key('print_status', PrintStatus.IDLE.value)
-            printer.stop_printing()
-            printer.delete_last_print_files()
-            ''' wait until the buffer becomes free '''
-            time.sleep(1)
-            printer.release_motors()
-            printer.cooldown_hotend()
-            printer.cooldown_bed()
-            printer.stop_move_up()
         elif action == 'resume':
             if not printer.on_the_print_page:
                 abort(403)
+            print_resume()
 
-            pdb.set_key('print_status', PrintStatus.PRINTING.value)
-            printer.resume_printing()
         elif action == 'pause':
             if not printer.on_the_print_page:
                 abort(403)
+            print_pause()
 
-            pdb.set_key('print_status', PrintStatus.PAUSED.value)
-            printer.pause_printing()
         elif action == 'percentage':
             percentage = printer.get_percentage()
+
         elif action == 'unfinished':
             if printer.on_the_print_page:
                 abort(403)
-
             cfup = printer.check_for_unfinished_print()
             if cfup[0] == True:
                 return jsonify({
@@ -134,6 +91,65 @@ def printing():
             'status': 'success',
             'percentage': percentage
         }), 200
+
     elif request.method == 'DELETE':
-        printer.delete_last_print_files()
+        print_delete_files()
         return Response(status=200)
+
+
+def print_start(req):
+    # TODO: maybe put the file inside uploads folder and print from there to avoid usb crash, etc.!
+    print_delete_files()
+
+    gcode_file_address = req['cd']
+
+    # set file dir in db
+    pdb.set_key('print_file_dir', gcode_file_address)
+
+    # set gcode link in db
+    ip = Utils.get_ip_list()
+    if len(ip):
+        gcode_file_link = 'http://{}/api/download/'.format(ip[0])
+    else:
+        gcode_file_link = 'http://localhost/api/download/'
+        print("!!! could not get IP list !!!")
+
+    if printer.base_path in gcode_file_address:  # from usb
+        gcode_file_address = gcode_file_address[len(printer.base_path)+1:]
+        gcode_file_link += 'usbs/' + gcode_file_address
+    else:  # from upload
+        gcode_file_link += 'files/' + gcode_file_address[len(UPLOAD_PROTOCOL):]
+
+    pdb.set_key('gcode_downloadable_link', gcode_file_link)
+
+    printer.start_printing_thread(gcode_dir=gcode_file_address,
+                                  line=req.get('line') or 0)
+
+
+def print_stop():
+    pdb.set_key('print_status', PrintStatus.IDLE.value)
+    printer.stop_printing()
+    print_delete_files()
+
+    ''' wait until the buffer becomes free '''
+    time.sleep(1)
+
+    printer.release_motors()
+    printer.cooldown_hotend()
+    printer.cooldown_bed()
+    printer.stop_move_up()
+
+
+def print_resume():
+    pdb.set_key('print_status', PrintStatus.PRINTING.value)
+    printer.resume_printing()
+
+
+def print_pause():
+    pdb.set_key('print_status', PrintStatus.PAUSED.value)
+    printer.pause_printing()
+
+
+def print_delete_files():
+    ''' delete last printed back up files '''
+    printer.delete_last_print_files()

@@ -30,14 +30,14 @@ class PickleDB:
     @error_handler_with(pickle_message)
     def get_key(self, key):
         if key not in PICKLE_KEYS:
-            raise "KEY NOT KNOWN!"
+            raise "KEY '{}' NOT KNOWN!".format(key)
 
         return self.db.get(key)
 
     @error_handler_with(pickle_message)
     def set_key(self, key, value):
         if key not in PICKLE_KEYS:
-            raise "KEY NOT KNOWN!"
+            raise "KEY '{}' NOT KNOWN!".format(key)
 
         cond1 = self.db.set(key, value)
         cond2 = self.db.dump()
