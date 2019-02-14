@@ -168,11 +168,14 @@ class Machine:
                             pass
                         first_done = True
 
-                    # check fan changes in the run gcode line
-                    if 'M106' in str(gcode_line):
-                        self.fan = 1
-                    elif 'M107' in str(gcode_line):
-                        self.fan = 0
+                        # check fan changes in the run gcode li
+                        try:
+                            if 'M106' in str(gcode_line):
+                                self.fan = 1
+                            elif 'M107' in str(gcode_line):
+                                self.fan = 0
+                        except Exception as e:
+                            print("setting fan error: ", e)
 
                     elif self.__Gcodes_return[0] == 1:
                         '''retrun temp'''
