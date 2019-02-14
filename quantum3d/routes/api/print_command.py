@@ -53,7 +53,6 @@ def printing():
             pdb.set_key('print_file_dir', gcode_file_address)
 
             # set gcode link in db
-            # TODO: change this to localhost
             ip = Utils.get_ip_list()
             if len(ip):
                 gcode_file_link = 'http://{}/api/download/'.format(ip[0])

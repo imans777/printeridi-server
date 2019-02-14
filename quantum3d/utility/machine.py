@@ -70,11 +70,11 @@ class Machine:
         self.__Feedrate_speed_percentage = 100
         self.__Travel_speed_percentage = 100
         self.__current_Z_position = 0
-        # self.recent_print_status = self.load_recent_print_status() # is a list of tuples
         self.ext_board = None
         self.use_ext_board = False
         self.number_of_extruder = 0
         self.active_toolhead = 0
+
         # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
@@ -93,12 +93,13 @@ class Machine:
         True as connected
         False as not connected
         """
+
         '''      check for extended board     '''
         try:
             self.ext_board = ExtendedBoard()
             self.use_ext_board = True
         except BaseException as e:
-            print("start machine connection error: ", e)
+            print("extended board connection error: ", e)
             self.use_ext_board = False
 
         try:
