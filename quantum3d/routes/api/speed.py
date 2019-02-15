@@ -4,9 +4,15 @@ from quantum3d.routes import api_bp as app
 from quantum3d.utility import printer
 
 
-@app.route('/speed', methods=['POST'])
+@app.route('/speed', methods=['GET', 'POST'])
 def set_speed():
     """
+    GETs the current speed
+    Response: {
+        feedrate: number,
+        flow: number
+    }
+
     Changes the speed of either print or flow by the sent value
     POST:
         Request: {
@@ -14,13 +20,19 @@ def set_speed():
             value: number
         }
     """
-    req = request.json
-    field = req.get('field', 'print')
-    value = req.get('value', 0)
-    if field == 'print':
-        printer.set_feedrate_speed(value)
-    elif field == 'flow':
-        printer.set_flow_speed(value)
+    if request.method == 'GET':
+        return jsonify({
+            'feedrate': printer.speed['feedrate'],
+            'flow': printer.speed['flow']
+        })
     else:
-        abort(404)
-    return Response(status=200)
+        req = request.json
+        field = req.get('field', 'print')
+        value = req.get('value', 0)
+        if field == 'print':
+            printer.set_feedrate_speed(value)
+        elif field == 'flow':
+            printer.set_flow_speed(value)
+        else:
+            abort(404)
+        return Response(status=200)

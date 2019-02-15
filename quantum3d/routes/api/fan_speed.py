@@ -16,7 +16,7 @@ def fan_speed():
         }
     """
     if request.method == 'GET':
-        fan = printer.fan
+        fan = printer.speed['fan']
         return jsonify({'fan': fan}), 200
     else:
         status = request.json['status']

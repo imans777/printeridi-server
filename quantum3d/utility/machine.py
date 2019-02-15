@@ -34,7 +34,11 @@ class Machine:
         self.is_locked = False
         self.printing_file = None  # When printing started, it will set to pure filename
         self.pin = None  # When locked, it will be set, when unlocked, it is None
-        self.fan = 0  # stores the fan status (0: off | 0.5: half | 1: on)
+        self.speed = {
+            'fan': 0,  # stores the fan status (0: off | 0.5: half | 1: on)
+            'feedrate': 100,        # stores the speed of feedrate (number)
+            'flow': 100             # stores the speed of the flow (number)
+        }
 
         try:
             settings = db.get_settings()
@@ -173,9 +177,17 @@ class Machine:
 
                         # check fan changes in the run gcode line
                         if 'M106' in str(gcode_line):
-                            self.fan = 1
+                            self.speed['fan'] = 1
                         elif 'M107' in str(gcode_line):
-                            self.fan = 0
+                            self.speed['fan'] = 0
+
+                        # check feedrate (220) or flow (221)
+                        if 'M220' in str(gcode_line):
+                            s = GCodeParser.parse(str(gcode_line)).get('S')
+                            self.speed['feedrate'] = s or 100
+                        elif 'M221' in str(gcode_line):
+                            s = GCodeParser.parse(str(gcode_line)).get('S')
+                            self.speed['flow'] = s or 100
 
                     elif self.__Gcodes_return[0] == 1:
                         '''return temp'''
@@ -247,6 +259,8 @@ class Machine:
         self.__stop_flag = False
         self.__pause_flag = False
         self.on_the_print_page = True
+        self.speed['feedrate'] = 100
+        self.speed['flow'] = 100
         command = None
         z_pos_offset = 0
         e_pos_offset = 0
@@ -560,13 +574,13 @@ class Machine:
         """
         if status == 'ON':
             self.append_gcode('M106 S255')
-            self.fan = 1
+            self.speed['fan'] = 1
         elif status == 'Half':
             self.append_gcode('M106 S127')
-            self.fan = 0.5
+            self.speed['fan'] = 0.5
         elif status == 'OFF':
             self.append_gcode('M107')
-            self.fan = 0
+            self.speed['fan'] = 0
 
     def move_axis(self, axis, positioning_mode, value):
         """
