@@ -177,17 +177,18 @@ class Machine:
 
                         try:
                             # check fan changes in the run gcode line
-                            if 'M106' in str(gcode_line):
+                            pure_line = self.__Gcodes_to_run[0]
+                            if 'M106' in pure_line:
                                 self.speed['fan'] = 1
-                            elif 'M107' in str(gcode_line):
+                            elif 'M107' in pure_line:
                                 self.speed['fan'] = 0
 
                             # check feedrate (220) or flow (221)
-                            if 'M220' in str(gcode_line):
-                                s = GCodeParser.parse(str(gcode_line)).get('S')
+                            if 'M220' in pure_line:
+                                s = GCodeParser.parse(pure_line).get('S')
                                 self.speed['feedrate'] = int(s) or 100
-                            elif 'M221' in str(gcode_line):
-                                s = GCodeParser.parse(str(gcode_line)).get('S')
+                            elif 'M221' in pure_line:
+                                s = GCodeParser.parse(pure_line).get('S')
                                 self.speed['flow'] = int(s) or 100
                         except Exception as e:
                             print("error updating speed info: ", e)
