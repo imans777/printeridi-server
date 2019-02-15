@@ -506,7 +506,6 @@ class Machine:
         # IMAN -> ADDED FOLLOWING LINE FOR DELETING BACK UP FILES
         self.delete_last_print_files()
         self.on_the_print_page = False
-        self.print_percentage = 0
         self.printing_file = None
 
         print_info = (new_print['time'], new_print['temperature'],
@@ -703,8 +702,7 @@ class Machine:
             gcode_dir = os.path.join(UPLOAD_FULL_PATH,
                                      gcode_dir[len(UPLOAD_PROTOCOL):])
         else:
-            gcode_dir = os.path.join(self.base_path,
-                                     gcode_dir)
+            gcode_dir = os.path.join(self.base_path, gcode_dir)
 
         # gcode_dir is now the COMPLETE FULL PATH to the file
         print('@@@ printing file dir:', gcode_dir)

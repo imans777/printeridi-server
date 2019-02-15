@@ -32,7 +32,6 @@ class ExtendedBoard:
                 check_number += 1
 
             if check_number > 3:
-                print('!!! extended board not found !!!')
                 raise BaseException('!!! no board found !!!')
 
             if self.board_serial.inWaiting():
