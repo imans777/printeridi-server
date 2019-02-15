@@ -98,7 +98,8 @@ def printing():
 
 
 def print_start(req):
-    # TODO: maybe put the file inside uploads folder and print from there to avoid usb crash, etc.!
+    # TODO: maybe put the file inside uploads folder
+    # and print from there to avoid usb crash, etc.!
     print_delete_files()
 
     gcode_file_address = req['cd']

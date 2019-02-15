@@ -706,8 +706,8 @@ class Machine:
             gcode_dir = os.path.join(self.base_path,
                                      gcode_dir)
 
-        print('@@@ printing file dir:', gcode_dir)
         # gcode_dir is now the COMPLETE FULL PATH to the file
+        print('@@@ printing file dir:', gcode_dir)
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
 
