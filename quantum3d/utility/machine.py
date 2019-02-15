@@ -757,12 +757,14 @@ class Machine:
     def set_feedrate_speed(self, percentage):
         #self.__Feedrate_speed_percentage = percentage
         self.append_gcode(gcode='M220 S%d' % (percentage))
+        self.speed['feedrate'] = percentage
 
     """ Flow means changes speed on only E axis """
 
     def set_flow_speed(self, percentage):
         #self.__Travel_speed_percentage = percentage
         self.append_gcode(gcode='M221 S%d' % (percentage))
+        self.speed['flow'] = percentage
 
     def get_current_Z_position(self):
         """
