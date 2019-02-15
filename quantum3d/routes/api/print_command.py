@@ -5,7 +5,7 @@ import os
 from quantum3d.routes import api_bp as app
 from quantum3d.utility import printer, Utils
 from quantum3d.db import pdb
-from quantum3d.constants import PrintStatus, UPLOAD_PROTOCOL
+from quantum3d.constants import PrintStatus, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
 
 
 @app.route('/print', methods=['DELETE', 'POST'])
@@ -14,7 +14,7 @@ def printing():
     POST:
         Request: {
             action: 'print' | 'stop' | 'pause' | 'resume' | 'percentage' | 'unfinished'
-            cd: string, (only if it was print)
+            cd: string, (only if it was print) ('upload://FILENAME' | 'PATH_TO_FILE')
             line: number (Optional)
         }
         Response (default): {
@@ -103,23 +103,17 @@ def print_start(req):
 
     gcode_file_address = req['cd']
 
-    # set file dir in db
-    pdb.set_key('print_file_dir', gcode_file_address)
-
-    # set gcode link in db
     ip = Utils.get_ip_list()
-    if len(ip):
-        gcode_file_link = 'http://{}/api/download/'.format(ip[0])
-    else:
-        gcode_file_link = 'http://localhost/api/download/'
-        print("!!! could not get IP list !!!")
+    gcode_file_link = 'http://{}/api/download/'.format(
+        len(ip) and ip[0] or 'localhost')
 
-    if printer.base_path in gcode_file_address:  # from usb
-        gcode_file_address = gcode_file_address[len(printer.base_path)+1:]
-        gcode_file_link += 'usbs/' + gcode_file_address
-    else:  # from upload
+    if str(gcode_file_address).startswith(UPLOAD_PROTOCOL):
         gcode_file_link += 'files/' + gcode_file_address[len(UPLOAD_PROTOCOL):]
+    else:
+        gcode_file_link += 'usbs/' + gcode_file_address
 
+    # set file dir and gcode link in db after modifications
+    pdb.set_key('print_file_dir', gcode_file_address)
     pdb.set_key('gcode_downloadable_link', gcode_file_link)
 
     printer.start_printing_thread(gcode_dir=gcode_file_address,

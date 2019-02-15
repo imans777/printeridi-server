@@ -32,7 +32,7 @@ class Machine:
         self.__Gcodes_to_run = []
         self.__Gcodes_return = []
         self.is_locked = False
-        self.printing_file = None  # When printing started, it will set to filename
+        self.printing_file = None  # When printing started, it will set to pure filename
         self.pin = None  # When locked, it will be set, when unlocked, it is None
         self.fan = 0  # stores the fan status (0: off | 0.5: half | 1: on)
 
@@ -254,10 +254,6 @@ class Machine:
         gcode_file = codecs.open(gcode_file_path, 'r')
         lines = []
 
-        '''get a backup from gcode file path for hibernate '''
-        with open('backup_print_path.bc', 'w') as backup_print:
-            backup_print.write(gcode_file_path)
-
         ''' read files lines'''
         for line in gcode_file:
             lines.append(GCodeParser.remove_chomp(line))
@@ -332,7 +328,7 @@ class Machine:
                 ''' stop printing when it is waiting in buffer'''
                 if self.__stop_flag:
                     break
-                time.sleep(0.1)  # wait 100 msec for reduce cpu usage
+                time.sleep(0.1)  # wait 100 ms to reduce cpu usage
 
             # if self.use_ext_board :
             #     '''   check for existance of filament   '''
@@ -691,22 +687,27 @@ class Machine:
         t.start()
         self.refresh_temp()
 
-    ''' print '''
+    ''' print 
+        gcode_dir: '<UPLOAD_PROTOCOL><GCODE_FILE_NAME>' or '<PATH_TO_GCODE_FILE_NAME_IN_USB>'
+    '''
 
     def start_printing_thread(self, gcode_dir, line=0):
         self.time = Time()
-        self.printing_file = gcode_dir
+        self.printing_file = str(gcode_dir).split(os.path.sep)[-1]
+
+        '''get a backup from gcode file path for hibernate '''
+        with open('backup_print_path.bc', 'w') as backup_print:
+            backup_print.write(gcode_dir)
+
         if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
-            gcode_dir = os.path.join(
-                UPLOAD_FULL_PATH,
-                gcode_dir[len(UPLOAD_PROTOCOL):]
-            )
+            gcode_dir = os.path.join(UPLOAD_FULL_PATH,
+                                     gcode_dir[len(UPLOAD_PROTOCOL):])
         else:
-            gcode_dir = os.path.join(
-                self.base_path,
-                gcode_dir
-            )
+            gcode_dir = os.path.join(self.base_path,
+                                     gcode_dir)
+
         print('@@@ printing file dir:', gcode_dir)
+        # gcode_dir is now the COMPLETE FULL PATH to the file
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
 
@@ -766,7 +767,7 @@ class Machine:
             backup_print_path = open('backup_print_path.bc', 'r')
             backup_file_path = backup_print_path.readline()
             backup_line = int(backup_print.readline())
-            print("backup line: ", backup_line)
+            print("backup file and line: ", backup_file_path, backup_line)
             backup_print.close()
             backup_print_path.close()
             return True, [backup_file_path, backup_line]
