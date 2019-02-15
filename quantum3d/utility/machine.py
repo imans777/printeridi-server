@@ -175,19 +175,22 @@ class Machine:
                             pass
                         first_done = True
 
-                        # check fan changes in the run gcode line
-                        if 'M106' in str(gcode_line):
-                            self.speed['fan'] = 1
-                        elif 'M107' in str(gcode_line):
-                            self.speed['fan'] = 0
+                        try:
+                            # check fan changes in the run gcode line
+                            if 'M106' in str(gcode_line):
+                                self.speed['fan'] = 1
+                            elif 'M107' in str(gcode_line):
+                                self.speed['fan'] = 0
 
-                        # check feedrate (220) or flow (221)
-                        if 'M220' in str(gcode_line):
-                            s = GCodeParser.parse(str(gcode_line)).get('S')
-                            self.speed['feedrate'] = s or 100
-                        elif 'M221' in str(gcode_line):
-                            s = GCodeParser.parse(str(gcode_line)).get('S')
-                            self.speed['flow'] = s or 100
+                            # check feedrate (220) or flow (221)
+                            if 'M220' in str(gcode_line):
+                                s = GCodeParser.parse(str(gcode_line)).get('S')
+                                self.speed['feedrate'] = int(s) or 100
+                            elif 'M221' in str(gcode_line):
+                                s = GCodeParser.parse(str(gcode_line)).get('S')
+                                self.speed['flow'] = int(s) or 100
+                        except Exception as e:
+                            print("error updating speed info: ", e)
 
                     elif self.__Gcodes_return[0] == 1:
                         '''return temp'''
