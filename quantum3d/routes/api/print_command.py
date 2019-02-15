@@ -120,11 +120,13 @@ def print_start(req):
     printer.start_printing_thread(gcode_dir=gcode_file_address,
                                   line=req.get('line') or 0)
 
+    pdb.set_key('print_status', PrintStatus.PRINTING.value)
+
 
 def print_stop():
-    pdb.set_key('print_status', PrintStatus.IDLE.value)
     printer.stop_printing()
     print_delete_files()
+    pdb.set_key('print_status', PrintStatus.IDLE.value)
 
     ''' wait until the buffer becomes free '''
     time.sleep(1)
@@ -136,13 +138,13 @@ def print_stop():
 
 
 def print_resume():
-    pdb.set_key('print_status', PrintStatus.PRINTING.value)
     printer.resume_printing()
+    pdb.set_key('print_status', PrintStatus.PRINTING.value)
 
 
 def print_pause():
-    pdb.set_key('print_status', PrintStatus.PAUSED.value)
     printer.pause_printing()
+    pdb.set_key('print_status', PrintStatus.PAUSED.value)
 
 
 def print_delete_files():
