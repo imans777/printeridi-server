@@ -58,6 +58,6 @@ PICKLE_KEYS = [
 
 
 class PrintStatus(Enum):
-    IDLE = 0
-    PRINTING = 1
-    PAUSED = 2
+    IDLE = 0        # on print stop
+    PRINTING = 1    # other conditions
+    PAUSED = 2      # on print pause

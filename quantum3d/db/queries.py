@@ -72,6 +72,8 @@ class PrinterDB:
 
     @error_handler_with(message)
     def create_extra_table(self):
+        # TODO: this whole table should be removed
+        # and should use pickledb for these items!
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS Extra
             (id INTEGER PRIMARY KEY CHECK (id = 0),
