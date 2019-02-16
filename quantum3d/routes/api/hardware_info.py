@@ -10,8 +10,8 @@ def get_hardware_info():
     GETs the current hardware info
     """
     return jsonify({
-        'gpu_temp': RHI.get_gpu_tempfunc(),
-        'cpu_temp': RHI.get_cpu_tempfunc(),
-        'cpu_usage': RHI.get_cpu_use(),
         'ram_usage': RHI.get_ram_info()
+        'cpu_usage': RHI.get_cpu_use(),
+        'cpu_temp': RHI.get_cpu_tempfunc(),
+        'gpu_temp': RHI.get_gpu_tempfunc(),
     }), 200
