@@ -212,22 +212,26 @@ class Machine:
                     elif self.__Gcodes_return[0] == 2:
                         '''return bed temp for mcode M190'''
                         data = self.machine_serial.readline().decode('utf-8')
-                        while data != 'ok\n':
+                        data = GCodeParser.remove_chomp(data)
+                        while data != 'ok':
                             splited = data.split(' ')
                             self.extruder_temp['current'] = float(
                                 splited[0][2:])
                             self.bed_temp['current'] = float(splited[2][2:])
                             data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 3:
                         '''return ext temp for mcode M109'''
                         data = self.machine_serial.readline().decode('utf-8')
-                        while data != 'ok\n':
+                        data = GCodeParser.remove_chomp(data)
+                        while data != 'ok':
                             splited = data.split(' ')
                             self.extruder_temp['current'] = float(
                                 splited[0][2:])
                             data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 4:

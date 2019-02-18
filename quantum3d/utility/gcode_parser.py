@@ -15,7 +15,7 @@ class GCodeParser:
 
     @staticmethod
     def remove_chomp(gcode):
-        return gcode.rstrip()
+        return gcode.strip()
 
     @staticmethod
     def parse(gcode):
