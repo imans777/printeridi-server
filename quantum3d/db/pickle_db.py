@@ -26,6 +26,8 @@ class PickleDB:
     def _init_values(self):
         self.set_key('sc_index', 0)
         self.set_key('print_status', PrintStatus.IDLE.value)
+        # self.set_key('pause_position_Y',0)
+        # self.set_key('pause_position_X',0)
 
     @error_handler_with(pickle_message)
     def get_key(self, key):

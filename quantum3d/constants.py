@@ -53,7 +53,7 @@ PICKLE_KEYS = [
     'gcode_downloadable_link',
     'sc_index',
     'selected_camera',
-    'print_status',
+    'print_status'
 ]
 
 

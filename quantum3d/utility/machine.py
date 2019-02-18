@@ -54,6 +54,8 @@ class Machine:
                 'pause_Z_offset': settings[10], 'pause_Z_move_feedrate': settings[11],
                 # printing buffer
                 'printing_buffer': settings[12],
+                # position tollhead go when pause the print
+                'X_pause_position':settings[13], 'Y_pause_position':settings[14]
             }
         except:
             print('ERROR -> could not get initial settings.')
@@ -474,12 +476,14 @@ class Machine:
                 self.append_gcode('G91')
                 self.append_gcode('G1 Z%f F%f' % (self.machine_settings['pause_Z_offset'],
                                                   self.machine_settings['pause_Z_move_feedrate']))
-                self.append_gcode('G28 X Y')
+                # self.append_gcode('G28 X Y')
+                self.append_gcode('G1 X%d Y%d'%(self.machine_settings['X_pause_position'],self.machine_settings['Y_pause_position']))
                 self.append_gcode('G90')
 
                 while self.__pause_flag:
                     if self.__stop_flag:
                         break
+                    time.sleep(0.1)  # wait 100 ms to reduce cpu usage
 
                 '''  go to the last position and then resume printing  '''
                 self.append_gcode('G1 X%f Y%f' % (X_pos, Y_pos))
