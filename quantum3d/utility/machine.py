@@ -11,9 +11,9 @@ import os
 
 from .print_time import Time
 from .extended_board import ExtendedBoard
-from quantum3d.db import db
+from quantum3d.db import db, pdb
 from .gcode_parser import GCodeParser
-from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
+from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS
 
 
 class Machine:
@@ -41,20 +41,7 @@ class Machine:
         }
 
         try:
-            settings = db.get_settings()
-            self.machine_settings = {
-                # manual bed leveling settings
-                'bedleveling_X1': settings[1], 'bedleveling_X2': settings[2],
-                'bedleveling_Y1': settings[3], 'bedleveling_Y2': settings[4],
-                'traveling_feedrate': settings[5],
-                'bedleveling_Z_ofsset': settings[6], 'bedleveling_Z_move_feedrate': settings[7],
-                # hibernate setting
-                'hibernate_Z_offset': settings[8], 'hibernate_Z_move_feedrate': settings[9],
-                # pause setting
-                'pause_Z_offset': settings[10], 'pause_Z_move_feedrate': settings[11],
-                # printing buffer
-                'printing_buffer': settings[12],
-            }
+            self.machine_settings = pdb.get_multiple(MACHINE_SETTINGS_KEYS)
         except:
             print('ERROR -> could not get initial settings.')
 
@@ -82,7 +69,7 @@ class Machine:
         # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
-        # send M105 (on a X-second interval) to machine to update temperature values
+        # send M105 to machine (on a X-second interval) to update temperature values
         self.refresh_temp_interval()
 
     def get_bed_temp(self):
@@ -658,7 +645,7 @@ class Machine:
         if stage == 1:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -669,7 +656,7 @@ class Machine:
         if stage == 2:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -680,7 +667,7 @@ class Machine:
         if stage == 3:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -691,7 +678,7 @@ class Machine:
         if stage == 4:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (

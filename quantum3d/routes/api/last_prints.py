@@ -11,9 +11,10 @@ def get_last_prints_info():
     (n = limit is passed in request)
     GET:
         Request: {
-            limit: number
+            limit: number || 10
         }
-        Response: [{print info}]
+        Response: PrintInfo[]
+        PrintInfo: {file_name, time, temperature, is_finished} + filament_type
     """
     try:
         limit = request.json.get('limit')

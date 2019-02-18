@@ -13,6 +13,10 @@ class Camera(CameraBase):
     @staticmethod
     def capture(dest, resize=(640, 480)):
         try:
+            if not Camera.cameraObj:
+                with picamera.PiCamera() as camera:
+                    Camera.cameraObj = camera
+                    time.sleep(2)
             Camera.cameraObj.capture(dest, resize=resize)
         except Exception as e:
             print("pi camera capture err: ", e)
