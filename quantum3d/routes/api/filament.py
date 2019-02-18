@@ -10,5 +10,4 @@ def filament_changes():
     Checks if the filament has been finished
     and then returns True if it was so
     """
-    printer.update_filament_status()
     return jsonify({'filament_flag': printer.is_filament()}), 200

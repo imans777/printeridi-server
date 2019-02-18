@@ -9,8 +9,10 @@ import threading
 import codecs
 import os
 
+import RPi.GPIO as GPIO
+
 from .print_time import Time
-from .extended_board import ExtendedBoard
+# from .extended_board import ExtendedBoard
 from quantum3d.db import db
 from .gcode_parser import GCodeParser
 from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
@@ -55,7 +57,9 @@ class Machine:
                 # printing buffer
                 'printing_buffer': settings[12],
                 # position tollhead go when pause the print
-                'X_pause_position':settings[13], 'Y_pause_position':settings[14]
+                'X_pause_position':settings[13], 'Y_pause_position':settings[14],
+                # position tollhead go when taking timelapse
+                'X_timelapse_position':settings[15], 'Y_timelapse_position':settings[16],
             }
         except:
             print('ERROR -> could not get initial settings.')
@@ -69,23 +73,31 @@ class Machine:
         self.__stop_flag = False
         self.__pause_flag = False
         self.__filament_pause_flag = False
-        self.__update_filament = False
-        self.__relay_updated = False
-        self.__relay_state = None
+        # self.__update_filament = False
+        # self.__relay_updated = False
+        # self.__relay_state = None
         self.on_the_print_page = False
         self.__Feedrate_speed_percentage = 100
         self.__Travel_speed_percentage = 100
         self.__current_Z_position = 0
-        self.ext_board = None
-        self.use_ext_board = False
+        # self.ext_board = None
+        self.use_filament_sensor = False
+        self.filament_sensor_pin = 2
         self.number_of_extruder = 0
         self.active_toolhead = 0
+
+        self.__take_timelapse = False
+
+        # TODO: add here the initial of sensor filament
+
 
         # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
         # send M105 (on a X-second interval) to machine to update temperature values
         self.refresh_temp_interval()
+
+ 
 
     def get_bed_temp(self):
         return self.bed_temp
@@ -100,13 +112,13 @@ class Machine:
         False as not connected
         """
 
-        '''      check for extended board     '''
-        try:
-            self.ext_board = ExtendedBoard()
-            self.use_ext_board = True
-        except BaseException as e:
-            print("extended board connection error: ", e)
-            self.use_ext_board = False
+        # '''      check for extended board     '''
+        # try:
+        #     self.ext_board = ExtendedBoard()
+        #     self.use_ext_board = True
+        # except BaseException as e:
+        #     print("extended board connection error: ", e)
+        #     self.use_ext_board = False
 
         try:
             self.machine_serial = serial.Serial(
@@ -150,22 +162,13 @@ class Machine:
         first_done = False
         while True:
             try:
-                if self.use_ext_board:
-                    if self.__update_filament:
-                        '''   check for existance of filament   '''
-                        self.__update_filament = False
-                        if self.ext_board.check_filament_status() == False:
-                            self.__pause_flag = True
-                            self.__filament_pause_flag = True
-                            print('!!! paused by filament error !!!')
-
-                    if self.__relay_updated:
-                        ''' set relay status '''
-                        self.__relay_updated = False
-                        self.ext_board.relay_status(
-                            self.__relay_state[0], self.__relay_state[1])
-                        print('relay %d status %r' %
-                              (self.__relay_state[0], self.__relay_state[1]))
+                # use_ext_board changed to use_filament_sensor
+                # this is for sensor filament  
+                if self.use_filament_sensor:
+                    if  self.__filament_pause_flag:
+                        self.__filament_pause_flag = False
+                        self.__pause_flag = True
+                        print('!!! paused by filament error !!!')
 
                 if self.__Gcodes_to_run:
                     gcode_line = (
@@ -177,28 +180,12 @@ class Machine:
                             pass
                         first_done = True
 
-                        try:
-                            # check fan changes in the run gcode line
-                            pure_line = self.__Gcodes_to_run[0]
-                            if 'M106' in pure_line:
-                                self.speed['fan'] = 1
-                            elif 'M107' in pure_line:
-                                self.speed['fan'] = 0
-
-                            # check feedrate (220) or flow (221)
-                            if 'M220' in pure_line:
-                                s = GCodeParser.parse(pure_line).get('S')
-                                self.speed['feedrate'] = int(s) or 100
-                            elif 'M221' in pure_line:
-                                s = GCodeParser.parse(pure_line).get('S')
-                                self.speed['flow'] = int(s) or 100
-                        except Exception as e:
-                            print("error updating speed info: ", e)
 
                     elif self.__Gcodes_return[0] == 1:
                         '''return temp'''
                         try:
                             data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
                             splited = data.split(' ')
                             self.extruder_temp['current'] = float(
                                 splited[1][2:])
@@ -235,13 +222,11 @@ class Machine:
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 4:
-                        '''return active toolhaeds'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        if data.find('Active'):
-                            self.number_of_extruder += 1
-                        elif data.find('Invalid'):
-                            pass
-                        first_done = True
+                        self.take_photo_func()
+                        while True:
+                            text = str(self.machine_serial.readline())
+                            if text.find('ok') != -1:
+                                break
 
                     if first_done:
                         self.__Gcodes_to_run.pop(0)
@@ -374,6 +359,7 @@ class Machine:
                     backup_print = open('backup_print.bc', 'w')
                     backup_print.write(layer)
                     backup_print.close()
+                    self.check_timelapse_status(X_pos,Y_pos)
 
                 simplify_layer = lines[x].find('; layer')
                 if simplify_layer == 0:
@@ -381,6 +367,7 @@ class Machine:
                     backup_print = open('backup_print.bc', 'w')
                     backup_print.write(layer)
                     backup_print.close()
+                    self.check_timelapse_status(X_pos,Y_pos)
 
             else:
                 command = GCodeParser.remove_comment(lines[x])
@@ -405,6 +392,18 @@ class Machine:
                             float(parse_command['S']))
                         self.append_gcode('M109 S%f' %
                                           (self.extruder_temp['point']), 3)
+
+                    elif parse_command['M'] == '106': # for M106
+                        self.speed['fan'] = int(float(parse_command['S']))
+                    
+                    elif parse_command['M'] == '107': # for M107
+                        self.speed['fan'] = 0
+
+                    elif parse_command['M'] == '220': # for M220
+                        self.speed['feedrate'] = int(float(parse_command['S']))
+
+                    elif parse_command['M'] == '221': # for M221
+                        self.speed['flow'] = int(float(parse_command['S']))
 
                     elif parse_command['M'] == '0':  # for M0
                         pass
@@ -735,10 +734,10 @@ class Machine:
         read_file_gcode_lines_thread = threading.Thread(
             target=self.__read_file_gcode_lines, args=(gcode_dir, line,))
 
-        ''' refresh the  ext board buffer to able get the filament error '''
-        if self.use_ext_board:
-            self.ext_board.flush_input_buffer()
-            self.ext_board.off_A_flag()
+        # ''' refresh the  ext board buffer to able get the filament error '''
+        # if self.use_ext_board:
+        #     self.ext_board.flush_input_buffer()
+        #     self.ext_board.off_A_flag()
 
         read_file_gcode_lines_thread.start()
         print('started')
@@ -751,11 +750,19 @@ class Machine:
         self.__pause_flag = True
 
     def resume_printing(self):
-        self.__pause_flag = False
-        self.__filament_pause_flag = False
-        if self.use_ext_board:
-            self.ext_board.flush_input_buffer()
-            self.ext_board.off_A_flag()
+        # self.__pause_flag = False
+        # self.__filament_pause_flag = False
+        if self.use_filament_sensor:
+            if not self.check_for_filament_manually(self.filament_sensor_pin): # oprator pressed resume but not inserted the filament 
+                self.__pause_flag = True
+                self.__filament_pause_flag = True
+            else :
+                self.__pause_flag = False
+                self.__filament_pause_flag = False              
+        else:
+            
+            self.__pause_flag = False
+            self.__filament_pause_flag = False
 
     def get_percentage(self):
         return self.print_percentage
@@ -813,33 +820,81 @@ class Machine:
                                           self.machine_settings['pause_Z_move_feedrate']))
         self.append_gcode('G90')
 
-    ''' recent activites '''
 
-    def check_last_print(self):
-        pass
 
-    def set_relay_ext_board(self, number, state):
-        self.__relay_updated = True
-        self.__relay_state = [number, state]
-        # if self.use_ext_board:
-        #     self.ext_board.relay_status(number, state)
+    '''       sensor filament methodes     '''
 
     def is_filament(self):
         return self .__filament_pause_flag
 
-    def update_filament_status(self):
-        self.__update_filament = True
 
-    def find_active_extruders(self):
-        ext_num = 0
-        while True:
-            self.machine_serial.write(b'T%d' % (ext_num))
-            data = self.machine_serial.readline().decode('utf-8')
-            if data.find('Active'):
-                ext_num += 1
-            elif data.find('Invalid'):
-                break
-        return ext_num
+    def sensor_filament_init(self,BCM_pin_number):
+        # for filament sensor 
+        try:
+            GPIO.setmode(GPIO.BCM)  
+            GPIO.setwarnings(False) 
+            GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+            GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING, callback=self.filament_sensor_event, bouncetime=300)
+            self.use_filament_sensor = True 
+        except Exception as e:
+            print('error in sensor_filament_init', e)
+    
+    def disable_sensor_filament(self):
+        try:
+            GPIO.cleanup()           # clean up GPIO
+            self.use_filament_sensor = False
+        except Exception as e:
+            print('error in disable_sensor_filament', e)
+            
 
+
+    def filament_sensor_event(self):
+        self.__filament_pause_flag = True
+        print('!!! filament sensor event called !!!')
+
+
+    def check_for_filament_manually(self,BCM_pin_number):
+        try:
+            if GPIO.input(BCM_pin_number): # on HIGH
+                return True
+            else: # on LOW
+                self.__filament_pause_flag = True
+                print('!!! filament manually detected no filament !!!')
+                return False
+        except Exception as e:
+            print('error in check_for_filament_manually', e)
+        
+
+
+    '''    two nozzel methodes       '''
     def select_extruder(self, ext_num):
         self.append_gcode('T%d' % (ext_num))
+
+
+
+
+
+    '''  timelapse methodes '''
+
+    def start_capture_timelapse(self):
+        self.__take_timelapse = True
+    
+    def end_capture_timelapse(self):
+        self.__take_timelapse = False
+
+    def move_ext_for_take_photo(self,x_pos,y_pose):
+        gcode = 'G1 X%f Y%f' % (x_pos, y_pose)
+        self.append_gcode(gcode=gcode)
+
+    def take_photo_gcode(self):
+        self.append_gcode('G00',4) # G00 just for get a "OK"
+
+    def take_photo_func(self):
+        pass
+        # TODO: take the frame here
+
+    def check_timelapse_status(self,current_x,current_y):
+        if self.__take_timelapse:
+            self.move_ext_for_take_photo(self.machine_settings['X_timelapse_position'],self.machine_settings['Y_timelapse_position'])
+            self.take_photo_gcode()
+            self.move_ext_for_take_photo(current_x,current_y)
