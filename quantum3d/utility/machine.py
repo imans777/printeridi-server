@@ -285,20 +285,26 @@ class Machine:
             '''get the extruder temp from the gcode'''
             for line in lines:
                 parse_line = GCodeParser.parse(line)
-                if 'M' in parse_line:
+                if 'T' in parse_line:
+                    self.active_toolhead = int(parse_line['T']) 
+                elif 'M' in parse_line:
                     if parse_line['M'] == '190':
                         if 'T' in parse_line:
-                            self.extruder_temp['point'] = int(
-                                float(parse_line['S']))
-                            self.append_gcode('M109 S%f T%d' % (
-                                self.extruder_temp['point'], parse_line['T']), 3)
+                            if parse_line['T'] == 0:
+                                self.extruder_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif parse_line['T'] == 1:
+                                self.extruder2_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
                         else:
-                            self.extruder_temp['point'] = int(
-                                float(parse_line['S']))
-                            self.append_gcode('M109 S%f T0' %
-                                              (self.extruder_temp['point']), 3)
+                            if self.active_toolhead == 0:
+                                self.extruder_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T0' %(self.extruder_temp['point']), 3)
+                            elif self.active_toolhead == 1:
+                                self.extruder2_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T1' %(self.extruder2_temp['point']), 3)
 
-                    break
+                    # break ## search in all the gcode lines because the second nozzel could be in any line 
 
             '''get the bed temp from the gcode'''
             for line in lines:
@@ -390,7 +396,10 @@ class Machine:
 
                 parse_command = GCodeParser.parse(command)
 
-                if 'M' in parse_command:  # M codes
+                if 'T' in parse_command: # T code
+                    self.active_toolhead = int(parse_command['M'])
+
+                elif 'M' in parse_command:  # M codes
 
                     if parse_command['M'] == '190':  # for M190
                         self.bed_temp['point'] = int(float(parse_command['S']))
@@ -398,10 +407,21 @@ class Machine:
                                           (self.bed_temp['point']), 2)
 
                     elif parse_command['M'] == '109':  # for M109
-                        self.extruder_temp['point'] = int(
-                            float(parse_command['S']))
-                        self.append_gcode('M109 S%f' %
-                                          (self.extruder_temp['point']), 3)
+                        if 'T' in parse_command:
+                            if parse_command['T'] == 0:
+                                self.extruder_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif parse_command['T'] == 1:
+                                self.extruder2_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
+                        else:
+                            if self.active_toolhead == 0:
+                                self.extruder_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif self.active_toolhead == 1:
+                                self.extruder2_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
+                            
 
                     elif parse_command['M'] == '106':  # for M106
                         self.speed['fan'] = int(float(parse_command['S']))
@@ -519,8 +539,10 @@ class Machine:
         '''      here       '''
         new_print = dict()
         new_print['time'] = str(self.time.read())
-        new_print['temperature'] = (
-            'Extruder: ' + str(self.extruder_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
+        if self.number_of_extruder == 1:
+            new_print['temperature'] = ('Extruder: ' + str(self.extruder_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
+        elif self.number_of_extruder == 2:
+            new_print['temperature'] = ('Extruder1: ' + str(self.extruder_temp['point']) + 'Extruder2: ' + str(self.extruder2_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
         new_print['file_name'] = str(self.printing_file)
         # new_print['filament_type'] = None # TO BE SET
         new_print['is_finished'] = 'Yes' if (
