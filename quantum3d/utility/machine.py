@@ -923,3 +923,13 @@ class Machine:
                 self.machine_settings['X_timelapse_position'], self.machine_settings['Y_timelapse_position'])
             self.take_photo_gcode()
             self.move_ext_for_take_photo(current_x, current_y)
+
+
+
+    '''    handwheel methodes       '''
+
+    def set_handwheel_offset_position(self,X_pose,Y_pose,Z_pose):
+        self.append_gcode('M206 X-%d Y-%d Z-%d'%(X_pose,Y_pose,Z_pose))
+
+    def deactive_handwheel_offset_position(self):
+        self.append_gcode('M206 X0 Y0 Z0')
