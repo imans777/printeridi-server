@@ -25,6 +25,16 @@ class PickleDB:
 
     def _initiate(self):
         self._init_values([
+            ('view3d', False),
+            ('rotate', True),
+            ('filament', False),
+            ('lcd', False),
+            ('width', 20),
+            ('height', 20),
+            ('extruders', 1),
+            ('serial_port', '/dev/ttyUSB0'),
+            ('baudrate', 250000),
+
             ('bedleveling_X1', 50),
             ('bedleveling_X2', 180),
             ('bedleveling_Y1', 50),
@@ -41,8 +51,6 @@ class PickleDB:
             ('Y_pause_position', 0),
             ('X_timelapse_position', 0),
             ('Y_timelapse_position', 0),
-            ('serial_port', '/dev/ttyUSB0'),
-            ('baudrate', 250000)
         ], False)
         self._init_values([
             ('sc_index', 0),
