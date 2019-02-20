@@ -19,7 +19,7 @@ from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MA
 
 
 class Machine:
-    def __init__(self, machine_port='/dev/ttyUSB0', machine_baudrate=250000):
+    def __init__(self, machine_port = '/dev/ttyUSB0', machine_baudrate = 250000,toolhead_number = 1):
         """
         :param machine_port:
         for linux base boards something like  '/dev/ttyUSB0'
@@ -49,8 +49,8 @@ class Machine:
 
         self.time = Time()
         self.Gcode_handler_error_logs = []
-        self.extruders_temp = []
         self.extruder_temp = {'current': 0, 'point': 0}
+        self.extruder2_temp = {'current': 0, 'point': 0}
         self.bed_temp = {'current': 0, 'point': 0}
         self.print_percentage = 0
         self.__stop_flag = False
@@ -66,7 +66,7 @@ class Machine:
         # self.ext_board = None
         self.use_filament_sensor = False
         self.filament_sensor_pin = 2
-        self.number_of_extruder = 0
+        self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
 
         self.__take_timelapse = False
@@ -84,6 +84,9 @@ class Machine:
 
     def get_extruder_temp(self):
         return self.extruder_temp
+        
+    def get_extruder2_temp(self):
+        return self.extruder2_temp
 
     def start_machine_connection(self):
         """
@@ -117,14 +120,6 @@ class Machine:
                 if text.find('ok') != -1:
                     break
 
-            '''           find active toolheads           '''
-            # TODO: BUGGISH CODE -> stays in infinite loop
-            # self.number_of_extruder = self.find_active_extruders()
-
-            '''    create a temp var for each toolhead    '''
-            for _ in range(self.number_of_extruder):
-                temps = {'current': 0, 'point': 0}
-                self.extruders_temp.append(temps)
 
             gcode_handler_thread = threading.Thread(
                 target=self.__Gcode_handler)
@@ -162,42 +157,78 @@ class Machine:
 
                     elif self.__Gcodes_return[0] == 1:
                         '''return temp'''
-                        try:
-                            data = self.machine_serial.readline().decode('utf-8')
-                            data = GCodeParser.remove_chomp(data)
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[1][2:])
-                            self.extruder_temp['point'] = float(splited[2][1:])
-                            self.bed_temp['current'] = float(splited[3][2:])
-                            self.bed_temp['point'] = float(splited[4][1:])
-                        except Exception as e:
-                            print("error setting temperatures: ", e)
+                        if self.number_of_extruder == 2:
+                            try:
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[1][2:])
+                                self.extruder_temp['point'] = float(splited[2][1:])
+                                self.extruder2_temp['current'] = float(splited[7][2:])
+                                self.extruder2_temp['point'] = float(splited[8][1:])
+                                self.bed_temp['current'] = float(splited[3][2:])
+                                self.bed_temp['point'] = float(splited[4][1:])
+                            except Exception as e:
+                                print("error setting temperatures: ", e)
+
+                        elif self.number_of_extruder == 1:
+                            try:
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[1][2:])
+                                self.extruder_temp['point'] = float(splited[2][1:])
+                                self.bed_temp['current'] = float(splited[3][2:])
+                                self.bed_temp['point'] = float(splited[4][1:])
+                            except Exception as e:
+                                print("error setting temperatures: ", e)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 2:
                         '''return bed temp for mcode M190'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        data = GCodeParser.remove_chomp(data)
-                        while data != 'ok':
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[0][2:])
-                            self.bed_temp['current'] = float(splited[2][2:])
+                        if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[0][2:])
+                                self.extruder2_temp['current'] = float(splited[6][2:])
+                                self.bed_temp['current'] = float(splited[2][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                        elif self.number_of_extruder == 1:
+                            data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[0][2:])
+                                self.bed_temp['current'] = float(splited[2][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 3:
                         '''return ext temp for mcode M109'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        data = GCodeParser.remove_chomp(data)
-                        while data != 'ok':
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[0][2:])
+                        if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[0][2:])
+                                self.extruder2_temp['current'] = float(splited[6][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                        elif self.number_of_extruder == 1:
+                            data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[0][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 4:
@@ -254,20 +285,26 @@ class Machine:
             '''get the extruder temp from the gcode'''
             for line in lines:
                 parse_line = GCodeParser.parse(line)
-                if 'M' in parse_line:
+                if 'T' in parse_line:
+                    self.active_toolhead = int(parse_line['T']) 
+                elif 'M' in parse_line:
                     if parse_line['M'] == '190':
                         if 'T' in parse_line:
-                            self.extruder_temp['point'] = int(
-                                float(parse_line['S']))
-                            self.append_gcode('M109 S%f T%d' % (
-                                self.extruder_temp['point'], parse_line['T']), 3)
+                            if parse_line['T'] == 0:
+                                self.extruder_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif parse_line['T'] == 1:
+                                self.extruder2_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
                         else:
-                            self.extruder_temp['point'] = int(
-                                float(parse_line['S']))
-                            self.append_gcode('M109 S%f T0' %
-                                              (self.extruder_temp['point']), 3)
+                            if self.active_toolhead == 0:
+                                self.extruder_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T0' %(self.extruder_temp['point']), 3)
+                            elif self.active_toolhead == 1:
+                                self.extruder2_temp['point'] = int(float(parse_line['S']))
+                                self.append_gcode('M109 S%f T1' %(self.extruder2_temp['point']), 3)
 
-                    break
+                    # break ## search in all the gcode lines because the second nozzel could be in any line 
 
             '''get the bed temp from the gcode'''
             for line in lines:
@@ -359,7 +396,10 @@ class Machine:
 
                 parse_command = GCodeParser.parse(command)
 
-                if 'M' in parse_command:  # M codes
+                if 'T' in parse_command: # T code
+                    self.active_toolhead = int(parse_command['M'])
+
+                elif 'M' in parse_command:  # M codes
 
                     if parse_command['M'] == '190':  # for M190
                         self.bed_temp['point'] = int(float(parse_command['S']))
@@ -367,10 +407,21 @@ class Machine:
                                           (self.bed_temp['point']), 2)
 
                     elif parse_command['M'] == '109':  # for M109
-                        self.extruder_temp['point'] = int(
-                            float(parse_command['S']))
-                        self.append_gcode('M109 S%f' %
-                                          (self.extruder_temp['point']), 3)
+                        if 'T' in parse_command:
+                            if parse_command['T'] == 0:
+                                self.extruder_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif parse_command['T'] == 1:
+                                self.extruder2_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
+                        else:
+                            if self.active_toolhead == 0:
+                                self.extruder_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T0' % (self.extruder_temp['point']), 3)
+                            elif self.active_toolhead == 1:
+                                self.extruder2_temp['point'] = int(float(parse_command['S']))
+                                self.append_gcode('M109 S%f T1' % (self.extruder2_temp['point']), 3)
+                            
 
                     elif parse_command['M'] == '106':  # for M106
                         self.speed['fan'] = int(float(parse_command['S']))
@@ -488,8 +539,10 @@ class Machine:
         '''      here       '''
         new_print = dict()
         new_print['time'] = str(self.time.read())
-        new_print['temperature'] = (
-            'Extruder: ' + str(self.extruder_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
+        if self.number_of_extruder == 1:
+            new_print['temperature'] = ('Extruder: ' + str(self.extruder_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
+        elif self.number_of_extruder == 2:
+            new_print['temperature'] = ('Extruder1: ' + str(self.extruder_temp['point']) + 'Extruder2: ' + str(self.extruder2_temp['point']) + ' - Bed: ' + str(self.bed_temp['point']))
         new_print['file_name'] = str(self.printing_file)
         # new_print['filament_type'] = None # TO BE SET
         new_print['is_finished'] = 'Yes' if (
@@ -611,12 +664,12 @@ class Machine:
     def cooldown_bed(self):
         self.append_gcode(gcode='M140 S0')
 
-    def set_hotend_temp(self, value):
+    def set_hotend_temp(self, value, toolhead_number = 0):
         if value+self.extruder_temp['point'] > 0:
             # +self.extruder_temp['point']))
-            self.append_gcode(gcode='M104 S%d' % value)
+            self.append_gcode(gcode='M104 S%d T%d' % (value,toolhead_number))
         else:
-            self.append_gcode(gcode='M104 S0')
+            self.append_gcode(gcode='M104 S0 T%d' % toolhead_number)
 
     def set_bed_temp(self, value):
         if value+self.bed_temp['point'] > 0:
@@ -870,3 +923,13 @@ class Machine:
                 self.machine_settings['X_timelapse_position'], self.machine_settings['Y_timelapse_position'])
             self.take_photo_gcode()
             self.move_ext_for_take_photo(current_x, current_y)
+
+
+
+    '''    handwheel methodes       '''
+
+    def set_handwheel_offset_position(self,X_pose,Y_pose,Z_pose):
+        self.append_gcode('M206 X-%d Y-%d Z-%d'%(X_pose,Y_pose,Z_pose))
+
+    def deactive_handwheel_offset_position(self):
+        self.append_gcode('M206 X0 Y0 Z0')
