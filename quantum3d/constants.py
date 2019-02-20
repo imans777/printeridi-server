@@ -60,6 +60,8 @@ PICKLE_KEYS = [
 GENERAL_SETTINGS_KEYS = [
     'view3d',
     'rotate',
+    'abs',
+    'timelapse',
     'filament',
     'lcd',
     'width',

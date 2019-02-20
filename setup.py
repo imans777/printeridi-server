@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name='quantum3d',
-    version='0.2',
+    version='0.2.0',
     author='imans77',
     author_email='iman.s_sani@yahoo.com',
     description=('''Quantum 3D Printer User Interface'''),

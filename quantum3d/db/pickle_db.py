@@ -27,6 +27,8 @@ class PickleDB:
         self._init_values([
             ('view3d', False),
             ('rotate', True),
+            ('abs', True),
+            ('timelapse', False),
             ('filament', False),
             ('lcd', False),
             ('width', 20),
