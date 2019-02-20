@@ -13,13 +13,13 @@ import RPi.GPIO as GPIO
 
 from .print_time import Time
 # from .extended_board import ExtendedBoard
-from quantum3d.db import db, pdb
+from quantum3d.db import db
 from .gcode_parser import GCodeParser
-from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS
+from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH
 
 
 class Machine:
-    def __init__(self, machine_port='/dev/ttyUSB0', machine_baudrate=250000):
+    def __init__(self, machine_port = '/dev/ttyUSB0', machine_baudrate = 250000,toolhead_number = 1):
         """
         :param machine_port:
         for linux base boards something like  '/dev/ttyUSB0'
@@ -43,14 +43,31 @@ class Machine:
         }
 
         try:
-            self.machine_settings = pdb.get_multiple(MACHINE_SETTINGS_KEYS)
+            settings = db.get_settings()
+            self.machine_settings = {
+                # manual bed leveling settings
+                'bedleveling_X1': settings[1], 'bedleveling_X2': settings[2],
+                'bedleveling_Y1': settings[3], 'bedleveling_Y2': settings[4],
+                'traveling_feedrate': settings[5],
+                'bedleveling_Z_ofsset': settings[6], 'bedleveling_Z_move_feedrate': settings[7],
+                # hibernate setting
+                'hibernate_Z_offset': settings[8], 'hibernate_Z_move_feedrate': settings[9],
+                # pause setting
+                'pause_Z_offset': settings[10], 'pause_Z_move_feedrate': settings[11],
+                # printing buffer
+                'printing_buffer': settings[12],
+                # position tollhead go when pause the print
+                'X_pause_position':settings[13], 'Y_pause_position':settings[14],
+                # position tollhead go when taking timelapse
+                'X_timelapse_position':settings[15], 'Y_timelapse_position':settings[16],
+            }
         except:
             print('ERROR -> could not get initial settings.')
 
         self.time = Time()
         self.Gcode_handler_error_logs = []
         self.extruder_temp = {'current': 0, 'point': 0}
-        self.extruder1_temp = {'current': 0, 'point': 0}
+        self.extruder2_temp = {'current': 0, 'point': 0}
         self.bed_temp = {'current': 0, 'point': 0}
         self.print_percentage = 0
         self.__stop_flag = False
@@ -66,18 +83,21 @@ class Machine:
         # self.ext_board = None
         self.use_filament_sensor = False
         self.filament_sensor_pin = 2
-        self.number_of_extruder = 1
+        self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
 
         self.__take_timelapse = False
 
         # TODO: add here the initial of sensor filament
 
+
         # TODO: if ran in test mode, this should connect to printer simulator
         self.start_machine_connection()
 
-        # send M105 to machine (on a X-second interval) to update temperature values
+        # send M105 (on a X-second interval) to machine to update temperature values
         self.refresh_temp_interval()
+
+ 
 
     def get_bed_temp(self):
         return self.bed_temp
@@ -85,8 +105,8 @@ class Machine:
     def get_extruder_temp(self):
         return self.extruder_temp
         
-    def get_extruder1_temp(self):
-        return self.extruder1_temp
+    def get_extruder2_temp(self):
+        return self.extruder2_temp
 
     def start_machine_connection(self):
         """
@@ -138,9 +158,9 @@ class Machine:
         while True:
             try:
                 # use_ext_board changed to use_filament_sensor
-                # this is for sensor filament
+                # this is for sensor filament  
                 if self.use_filament_sensor:
-                    if self.__filament_pause_flag:
+                    if  self.__filament_pause_flag:
                         self.__filament_pause_flag = False
                         self.__pause_flag = True
                         print('!!! paused by filament error !!!')
@@ -155,44 +175,81 @@ class Machine:
                             pass
                         first_done = True
 
+
                     elif self.__Gcodes_return[0] == 1:
                         '''return temp'''
-                        try:
-                            data = self.machine_serial.readline().decode('utf-8')
-                            data = GCodeParser.remove_chomp(data)
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[1][2:])
-                            self.extruder_temp['point'] = float(splited[2][1:])
-                            self.bed_temp['current'] = float(splited[3][2:])
-                            self.bed_temp['point'] = float(splited[4][1:])
-                        except Exception as e:
-                            print("error setting temperatures: ", e)
+                        if self.number_of_extruder == 2:
+                            try:
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[1][2:])
+                                self.extruder_temp['point'] = float(splited[2][1:])
+                                self.extruder2_temp['current'] = float(splited[7][2:])
+                                self.extruder2_temp['point'] = float(splited[8][1:])
+                                self.bed_temp['current'] = float(splited[3][2:])
+                                self.bed_temp['point'] = float(splited[4][1:])
+                            except Exception as e:
+                                print("error setting temperatures: ", e)
+
+                        elif self.number_of_extruder == 1:
+                            try:
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[1][2:])
+                                self.extruder_temp['point'] = float(splited[2][1:])
+                                self.bed_temp['current'] = float(splited[3][2:])
+                                self.bed_temp['point'] = float(splited[4][1:])
+                            except Exception as e:
+                                print("error setting temperatures: ", e)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 2:
                         '''return bed temp for mcode M190'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        data = GCodeParser.remove_chomp(data)
-                        while data != 'ok':
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[0][2:])
-                            self.bed_temp['current'] = float(splited[2][2:])
+                        if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[0][2:])
+                                self.extruder2_temp['current'] = float(splited[6][2:])
+                                self.bed_temp['current'] = float(splited[2][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                        elif self.number_of_extruder == 1:
+                            data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[0][2:])
+                                self.bed_temp['current'] = float(splited[2][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 3:
                         '''return ext temp for mcode M109'''
-                        data = self.machine_serial.readline().decode('utf-8')
-                        data = GCodeParser.remove_chomp(data)
-                        while data != 'ok':
-                            splited = data.split(' ')
-                            self.extruder_temp['current'] = float(
-                                splited[0][2:])
+                        if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(splited[0][2:])
+                                self.extruder2_temp['current'] = float(splited[6][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
+                        elif self.number_of_extruder == 1:
+                            data = self.machine_serial.readline().decode('utf-8')
+                            data = GCodeParser.remove_chomp(data)
+                            while data != 'ok':
+                                splited = data.split(' ')
+                                self.extruder_temp['current'] = float(
+                                    splited[0][2:])
+                                data = self.machine_serial.readline().decode('utf-8')
+                                data = GCodeParser.remove_chomp(data)
                         first_done = True
 
                     elif self.__Gcodes_return[0] == 4:
@@ -244,7 +301,7 @@ class Machine:
         '''hibernate mode'''
         if line_to_go != 0:
 
-            '''                   first heat up the nozzles and bed                  '''
+            '''                   first heat up the nozzels and bed                  '''
 
             '''get the extruder temp from the gcode'''
             for line in lines:
@@ -333,7 +390,7 @@ class Machine:
                     backup_print = open('backup_print.bc', 'w')
                     backup_print.write(layer)
                     backup_print.close()
-                    self.check_timelapse_status(X_pos, Y_pos)
+                    self.check_timelapse_status(X_pos,Y_pos)
 
                 simplify_layer = lines[x].find('; layer')
                 if simplify_layer == 0:
@@ -341,7 +398,7 @@ class Machine:
                     backup_print = open('backup_print.bc', 'w')
                     backup_print.write(layer)
                     backup_print.close()
-                    self.check_timelapse_status(X_pos, Y_pos)
+                    self.check_timelapse_status(X_pos,Y_pos)
 
             else:
                 command = GCodeParser.remove_comment(lines[x])
@@ -367,16 +424,16 @@ class Machine:
                         self.append_gcode('M109 S%f' %
                                           (self.extruder_temp['point']), 3)
 
-                    elif parse_command['M'] == '106':  # for M106
+                    elif parse_command['M'] == '106': # for M106
                         self.speed['fan'] = int(float(parse_command['S']))
-
-                    elif parse_command['M'] == '107':  # for M107
+                    
+                    elif parse_command['M'] == '107': # for M107
                         self.speed['fan'] = 0
 
-                    elif parse_command['M'] == '220':  # for M220
+                    elif parse_command['M'] == '220': # for M220
                         self.speed['feedrate'] = int(float(parse_command['S']))
 
-                    elif parse_command['M'] == '221':  # for M221
+                    elif parse_command['M'] == '221': # for M221
                         self.speed['flow'] = int(float(parse_command['S']))
 
                     elif parse_command['M'] == '0':  # for M0
@@ -454,8 +511,7 @@ class Machine:
                 self.append_gcode('G1 Z%f F%f' % (self.machine_settings['pause_Z_offset'],
                                                   self.machine_settings['pause_Z_move_feedrate']))
                 # self.append_gcode('G28 X Y')
-                self.append_gcode('G1 X%d Y%d' % (
-                    self.machine_settings['X_pause_position'], self.machine_settings['Y_pause_position']))
+                self.append_gcode('G1 X%d Y%d'%(self.machine_settings['X_pause_position'],self.machine_settings['Y_pause_position']))
                 self.append_gcode('G90')
 
                 while self.__pause_flag:
@@ -606,12 +662,12 @@ class Machine:
     def cooldown_bed(self):
         self.append_gcode(gcode='M140 S0')
 
-    def set_hotend_temp(self, value):
+    def set_hotend_temp(self, value, toolhead_number = 0):
         if value+self.extruder_temp['point'] > 0:
             # +self.extruder_temp['point']))
-            self.append_gcode(gcode='M104 S%d' % value)
+            self.append_gcode(gcode='M104 S%d T%d' % (value,toolhead_number))
         else:
-            self.append_gcode(gcode='M104 S0')
+            self.append_gcode(gcode='M104 S0 T%d' % toolhead_number)
 
     def set_bed_temp(self, value):
         if value+self.bed_temp['point'] > 0:
@@ -636,7 +692,7 @@ class Machine:
         if stage == 1:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -647,7 +703,7 @@ class Machine:
         if stage == 2:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -658,7 +714,7 @@ class Machine:
         if stage == 3:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -669,7 +725,7 @@ class Machine:
         if stage == 4:
             self.append_gcode(gcode='G91')
             gcode = 'G1 Z%f F%f' % (
-                self.machine_settings['bedleveling_Z_offset'], self.machine_settings['bedleveling_Z_move_feedrate'])
+                self.machine_settings['bedleveling_Z_ofsset'], self.machine_settings['bedleveling_Z_move_feedrate'])
             self.append_gcode(gcode=gcode)
             self.append_gcode(gcode='G90')
             gcode = 'G1 X%d Y%d F%f' % (
@@ -728,15 +784,14 @@ class Machine:
         # self.__pause_flag = False
         # self.__filament_pause_flag = False
         if self.use_filament_sensor:
-            # oprator pressed resume but not inserted the filament
-            if not self.check_for_filament_manually(self.filament_sensor_pin):
+            if not self.check_for_filament_manually(self.filament_sensor_pin): # oprator pressed resume but not inserted the filament 
                 self.__pause_flag = True
                 self.__filament_pause_flag = True
-            else:
+            else :
                 self.__pause_flag = False
-                self.__filament_pause_flag = False
+                self.__filament_pause_flag = False              
         else:
-
+            
             self.__pause_flag = False
             self.__filament_pause_flag = False
 
@@ -796,72 +851,81 @@ class Machine:
                                           self.machine_settings['pause_Z_move_feedrate']))
         self.append_gcode('G90')
 
+
+
     '''       sensor filament methodes     '''
 
     def is_filament(self):
         return self .__filament_pause_flag
 
-    def sensor_filament_init(self, BCM_pin_number):
-        # for filament sensor
+
+    def sensor_filament_init(self,BCM_pin_number):
+        # for filament sensor 
         try:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setwarnings(False)
+            GPIO.setmode(GPIO.BCM)  
+            GPIO.setwarnings(False) 
             GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-            GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
-                                  callback=self.filament_sensor_event, bouncetime=300)
-            self.use_filament_sensor = True
+            GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING, callback=self.filament_sensor_event, bouncetime=300)
+            self.use_filament_sensor = True 
         except Exception as e:
             print('error in sensor_filament_init', e)
-
+    
     def disable_sensor_filament(self):
         try:
             GPIO.cleanup()           # clean up GPIO
             self.use_filament_sensor = False
         except Exception as e:
             print('error in disable_sensor_filament', e)
+            
+
 
     def filament_sensor_event(self):
         self.__filament_pause_flag = True
         print('!!! filament sensor event called !!!')
 
-    def check_for_filament_manually(self, BCM_pin_number):
+
+    def check_for_filament_manually(self,BCM_pin_number):
         try:
-            if GPIO.input(BCM_pin_number):  # on HIGH
+            if GPIO.input(BCM_pin_number): # on HIGH
                 return True
-            else:  # on LOW
+            else: # on LOW
                 self.__filament_pause_flag = True
                 print('!!! filament manually detected no filament !!!')
                 return False
         except Exception as e:
             print('error in check_for_filament_manually', e)
+        
 
-    '''    two nozzles methodes       '''
 
+    '''    two nozzel methodes       '''
     def select_extruder(self, ext_num):
         self.append_gcode('T%d' % (ext_num))
+
+
+
+
 
     '''  timelapse methodes '''
 
     def start_capture_timelapse(self):
         self.__take_timelapse = True
-
+    
     def end_capture_timelapse(self):
         self.__take_timelapse = False
 
-    def move_ext_for_take_photo(self, x_pos, y_pose):
+    def move_ext_for_take_photo(self,x_pos,y_pose):
         gcode = 'G1 X%f Y%f' % (x_pos, y_pose)
         self.append_gcode(gcode=gcode)
 
     def take_photo_gcode(self):
-        self.append_gcode('G00', 4)  # G00 just for get a "OK"
+        self.append_gcode('G00',4) # G00 just for get a "OK"
 
     def take_photo_func(self):
         pass
         # TODO: take the frame here
 
-    def check_timelapse_status(self, current_x, current_y):
+    def check_timelapse_status(self,current_x,current_y):
         if self.__take_timelapse:
-            self.move_ext_for_take_photo(
-                self.machine_settings['X_timelapse_position'], self.machine_settings['Y_timelapse_position'])
+            self.move_ext_for_take_photo(self.machine_settings['X_timelapse_position'],self.machine_settings['Y_timelapse_position'])
             self.take_photo_gcode()
-            self.move_ext_for_take_photo(current_x, current_y)
+            self.move_ext_for_take_photo(current_x,current_y)
