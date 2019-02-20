@@ -66,8 +66,8 @@ class Machine:
 
         self.time = Time()
         self.Gcode_handler_error_logs = []
-        self.extruders_temp = []
         self.extruder_temp = {'current': 0, 'point': 0}
+        self.extruder1_temp = {'current': 0, 'point': 0}
         self.bed_temp = {'current': 0, 'point': 0}
         self.print_percentage = 0
         self.__stop_flag = False
@@ -83,7 +83,7 @@ class Machine:
         # self.ext_board = None
         self.use_filament_sensor = False
         self.filament_sensor_pin = 2
-        self.number_of_extruder = 0
+        self.number_of_extruder = 1
         self.active_toolhead = 0
 
         self.__take_timelapse = False
@@ -104,6 +104,9 @@ class Machine:
 
     def get_extruder_temp(self):
         return self.extruder_temp
+        
+    def get_extruder1_temp(self):
+        return self.extruder1_temp
 
     def start_machine_connection(self):
         """
@@ -137,14 +140,6 @@ class Machine:
                 if text.find('ok') != -1:
                     break
 
-            '''           find active toolheads           '''
-            # TODO: BUGGISH CODE -> stays in infinite loop
-            # self.number_of_extruder = self.find_active_extruders()
-
-            '''    create a temp var for each toolhead    '''
-            for _ in range(self.number_of_extruder):
-                temps = {'current': 0, 'point': 0}
-                self.extruders_temp.append(temps)
 
             gcode_handler_thread = threading.Thread(
                 target=self.__Gcode_handler)
