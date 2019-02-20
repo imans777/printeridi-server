@@ -43,6 +43,7 @@ def changeCameraTo(cam):
 
 
 # use this objects to work with utility
-printer = Machine()
+serial_port, baudrate = pdb.get_key('serial_port'), pdb.get_key('baudrate')
+printer = Machine(serial_port, baudrate)
 extra = Extra()
 print("-> Machine initialized")

@@ -8,6 +8,8 @@ import sqlite3
 from sqlite3 import Error
 from .error_handler import error_handler_with, message
 
+# TODO: NO MORE MOVE SETTINGS TABLE NEEDED! PLEASE REMOVE THEM A.S.A.P!!
+
 
 class PrinterDB:
     def __init__(self, default_initiate=True):

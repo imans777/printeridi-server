@@ -51,10 +51,51 @@ PICKLE_KEYS = [
     'theme',
     'print_file_dir',
     'gcode_downloadable_link',
-    'sc_index',
+    'sc_index',  # USE TIME INSTEAD!
     'selected_camera',
     'print_status'
 ]
+
+# settings
+GENERAL_SETTINGS_KEYS = [
+    'view3d',
+    'rotate',
+    'filament',
+    'lcd',
+    'width',
+    'height',
+    'extruders',
+    'serial_port',
+    'baudrate',
+]
+MACHINE_SETTINGS_KEYS = [
+    # manual bed leveling settings
+    'bedleveling_X1',
+    'bedleveling_X2',
+    'bedleveling_Y1',
+    'bedleveling_Y2',
+    'traveling_feedrate',
+    'bedleveling_Z_offset',
+    'bedleveling_Z_move_feedrate',
+    # hibernate
+    'hibernate_Z_offset',
+    'hibernate_Z_move_feedrate',
+    # pause
+    'pause_Z_offset',
+    'pause_Z_move_feedrate',
+    # buffer
+    'printing_buffer',
+    # the position the toolhead should go when the print is paused
+    'X_pause_position',
+    'Y_pause_position',
+    # the position the toolhead should go when taking timelapse
+    'X_timelapse_position',
+    'Y_timelapse_position',
+]
+
+# add settings keys to pickle available keys
+PICKLE_KEYS.extend(GENERAL_SETTINGS_KEYS)
+PICKLE_KEYS.extend(MACHINE_SETTINGS_KEYS)
 
 
 class PrintStatus(Enum):

@@ -32,6 +32,3 @@ class GCodeParser:
         for item in dic:
             gcode += (item + dic[item]) + ' '
         return gcode
-
-test = b'm195 s10.000000\t\n\r'
-print(GCodeParser.remove_chomp(test))

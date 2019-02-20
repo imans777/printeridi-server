@@ -10,4 +10,5 @@ def extended_board_connection():
     Returns True if the extended board
     has been connected successfully, else False
     """
-    return jsonify({'is_connected': printer.use_ext_board}), 200
+    # return jsonify({'is_connected': printer.use_ext_board}), 200
+    pass
