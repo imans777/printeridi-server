@@ -53,7 +53,7 @@ PICKLE_KEYS = [
     'gcode_downloadable_link',
     'sc_index',  # USE TIME INSTEAD!
     'selected_camera',
-    'print_status',
+    'print_status'
 ]
 
 # settings
@@ -69,6 +69,7 @@ GENERAL_SETTINGS_KEYS = [
     'baudrate',
 ]
 MACHINE_SETTINGS_KEYS = [
+    # manual bed leveling settings
     'bedleveling_X1',
     'bedleveling_X2',
     'bedleveling_Y1',
@@ -76,13 +77,18 @@ MACHINE_SETTINGS_KEYS = [
     'traveling_feedrate',
     'bedleveling_Z_offset',
     'bedleveling_Z_move_feedrate',
+    # hibernate
     'hibernate_Z_offset',
     'hibernate_Z_move_feedrate',
+    # pause
     'pause_Z_offset',
     'pause_Z_move_feedrate',
+    # buffer
     'printing_buffer',
+    # the position the toolhead should go when the print is paused
     'X_pause_position',
     'Y_pause_position',
+    # the position the toolhead should go when taking timelapse
     'X_timelapse_position',
     'Y_timelapse_position',
 ]
