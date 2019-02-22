@@ -12,13 +12,14 @@ if __name__ == '__main__':
 
     # Main app
     from quantum3d import printer_app
+    from quantum3d.db import pdb
     printer_app.config.update(
         SECRET_KEY='T|-|E @R|<@M |<N|G|-|T',
         UPLOAD_FOLDER=os.environ['UPLOAD_FOLDER']
     )
 
-    # Run chromium if wasn't in development nor on windows
-    if os.environ['FLASK_ENV'] != 'development' and os.environ['CUR_ENV'].lower() == 'rpi':
+    # Run chromium if wasn't in development nor on windows and when lcd was requested
+    if os.environ['FLASK_ENV'] != 'development' and os.environ['CUR_ENV'].lower() == 'rpi' and pdb.get_key('lcd'):
         print('-> starting chromium')
         import subprocess
         subprocess.Popen(["chromium-browser", "--disk-cache-dir=/dev/null",
