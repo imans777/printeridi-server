@@ -1,4 +1,4 @@
-from flask import request, json, jsonify
+from flask import request, json, jsonify, Response
 
 from quantum3d.routes import api_bp as app
 from quantum3d.db import db, pdb
@@ -20,5 +20,7 @@ def general_settings():
         all_settings.update(machine_settings)
         return jsonify(all_settings), 200
     else:
-        # ONLY SEND THE VALUES THAT SHOULD BE CHANGED
-        pass
+        changed_fields = request.json
+        for field in changed_fields:
+            pdb.set_key(field, changed_fields[field])
+        return Response(status=200)
