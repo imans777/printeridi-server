@@ -143,8 +143,7 @@ class Machine:
                 # use_ext_board changed to use_filament_sensor
                 # this is for sensor filament
                 if self.use_filament_sensor:
-                    if self.__filament_pause_flag:
-                        self.__filament_pause_flag = False
+                    if self.__filament_pause_flag and not self.__pause_flag:
                         self.__pause_flag = True
                         print('!!! paused by filament error !!!')
 
