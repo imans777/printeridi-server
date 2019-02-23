@@ -101,6 +101,6 @@ PICKLE_KEYS.extend(MACHINE_SETTINGS_KEYS)
 
 
 class PrintStatus(Enum):
-    IDLE = 0        # on print stop
+    IDLE = 0        # init | on print stop
     PRINTING = 1    # other conditions
     PAUSED = 2      # on print pause
