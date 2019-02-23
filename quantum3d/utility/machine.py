@@ -901,7 +901,7 @@ class Machine:
     def is_filament(self):
         return self .__filament_pause_flag
 
-    def sensor_filament_init(self, BCM_pin_number=2):
+    def sensor_filament_init(self, BCM_pin_number=4):
         # for filament sensor
         self.filament_sensor_pin = BCM_pin_number
         try:
@@ -909,7 +909,7 @@ class Machine:
             GPIO.setwarnings(False)
             GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
-                                  callback=lambda x: print("ok", x), bouncetime=300)
+                                  callback=self.filament_sensor_event, bouncetime=300)
             self.use_filament_sensor = True
         except Exception as e:
             print('error in sensor_filament_init', e)
