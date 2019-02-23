@@ -68,7 +68,7 @@ class Machine:
         self.__current_Z_position = 0
         # self.ext_board = None
         self.use_filament_sensor = False
-        self.filament_sensor_pin = 2
+        self.filament_sensor_pin = 0
         self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
 
@@ -901,8 +901,9 @@ class Machine:
     def is_filament(self):
         return self .__filament_pause_flag
 
-    def sensor_filament_init(self, BCM_pin_number=2):
+    def sensor_filament_init(self, BCM_pin_number=0):
         # for filament sensor
+        self.filament_sensor_pin = BCM_pin_number
         try:
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
