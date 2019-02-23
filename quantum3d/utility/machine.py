@@ -145,7 +145,7 @@ class Machine:
                 if self.use_filament_sensor:
                     if self.__filament_pause_flag and not self.__pause_flag:
                         self.__pause_flag = True
-                        print('!!! paused by filament error !!!')
+                        print("!!! paused by filament error !!!")
 
                 if self.__Gcodes_to_run:
                     gcode_line = (
