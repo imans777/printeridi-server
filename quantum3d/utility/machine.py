@@ -901,7 +901,7 @@ class Machine:
     def is_filament(self):
         return self .__filament_pause_flag
 
-    def sensor_filament_init(self, BCM_pin_number=0):
+    def sensor_filament_init(self, BCM_pin_number=2):
         # for filament sensor
         self.filament_sensor_pin = BCM_pin_number
         try:
