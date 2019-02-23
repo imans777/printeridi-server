@@ -34,5 +34,10 @@ def instantSettingChanges(changes):
             printer.sensor_filament_init()
         else:
             printer.disable_sensor_filament()
+    if 'timelapse' in changes:
+        if changes['timelapse']:
+            printer.start_capture_timelapse()
+        else:
+            printer.end_capture_timelapse()
 
     # list(set(changes) & set(['filament', 'another'])) -> intersection( key)s!

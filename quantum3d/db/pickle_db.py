@@ -56,7 +56,8 @@ class PickleDB:
         ], False)
         self._init_values([
             ('sc_index', 0),
-            ('print_status', PrintStatus.IDLE.value)
+            ('print_status', PrintStatus.IDLE.value),
+            ('selected_camera', ''),
         ], True)
 
     def _init_values(self, values, force=False):

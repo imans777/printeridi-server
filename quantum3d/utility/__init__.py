@@ -10,39 +10,10 @@ from .raspberry_hardware_info import RaspberryHardwareInfo
 
 from .print_time import Time
 from .extended_board import ExtendedBoard
-
-from quantum3d.db import pdb
-
-# import camera driver
-import os
-from .cameras.camera_pi import Camera as CameraPi
-from .cameras.camera_webcam import Camera as CameraWebcam
-
-Camera = {}
-Camera['pi'] = CameraPi
-Camera['webcam'] = CameraWebcam
-pdb.set_key('selected_camera', '')
-
-
-def changeCameraTo(cam):
-    # TODO: this doesn't work as expected!
-    # maybe a dictionary of cameras' a better idea?
-    ''' this changes the Camera object to a desired camera '''
-    global Camera
-    try:
-        if cam == 'pi':
-            pdb.set_key('selected_camera', 'pi')
-        elif 'webcam' in cam:
-            Camera['webcam'].selected_camera = int(cam[len('webcam'):])
-            pdb.set_key('selected_camera', 'webcam')
-        else:
-            return False
-    except:
-        return False
-    return True
-
+from .cameras import Camera, changeCameraTo
 
 # use this objects to work with utility
+from quantum3d.db import pdb
 printer = Machine(
     pdb.get_key('serial_port'),
     pdb.get_key('baudrate'),

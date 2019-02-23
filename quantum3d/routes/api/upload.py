@@ -33,9 +33,6 @@ def uploadFile():
     return Response(status=200)
 
 
-# TODO: need an API for printer settings
-# TODO: need an API for getting raspberry hardware info
-
 @app.route('/upload-file', methods=['GET'])
 def getUploadedFiles():
     """
