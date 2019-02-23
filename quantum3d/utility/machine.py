@@ -922,8 +922,9 @@ class Machine:
             print('error in disable_sensor_filament', e)
 
     def filament_sensor_event(self, channel):
-        self.__filament_pause_flag = True
-        print('!!! filament sensor event called !!!')
+        if GPIO.input(self.filament_sensor_pin) == 0:
+            self.__filament_pause_flag = True
+            print('!!! filament sensor event called !!!')
 
     def check_for_filament_manually(self, BCM_pin_number):
         try:
