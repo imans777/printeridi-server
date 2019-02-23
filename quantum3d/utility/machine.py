@@ -909,7 +909,7 @@ class Machine:
             GPIO.setwarnings(False)
             GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
-                                  callback=self.filament_sensor_event, bouncetime=300)
+                                  callback=lambda x: print("ok", x), bouncetime=300)
             self.use_filament_sensor = True
         except Exception as e:
             print('error in sensor_filament_init', e)
