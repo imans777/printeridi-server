@@ -921,7 +921,7 @@ class Machine:
         except Exception as e:
             print('error in disable_sensor_filament', e)
 
-    def filament_sensor_event(self):
+    def filament_sensor_event(self, channel):
         self.__filament_pause_flag = True
         print('!!! filament sensor event called !!!')
 
