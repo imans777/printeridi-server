@@ -255,6 +255,7 @@ class Machine:
                             text = str(self.machine_serial.readline())
                             if text.find('ok') != -1:
                                 break
+                        first_done = True
 
                     if first_done:
                         self.__Gcodes_to_run.pop(0)
