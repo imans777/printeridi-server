@@ -31,6 +31,9 @@ def changeCameraTo(cam):
 def captureImage():
     ''' capture image automatically '''
     try:
+        if not pdb.get_key('timelapse'):
+            return True
+
         full_file_name = pdb.get_key('print_file_dir')
         trim_file_name = str(full_file_name).split('.')[0].split('/')[-1]
         final_folder = os.path.join(SC_FULL_PATH, trim_file_name)
