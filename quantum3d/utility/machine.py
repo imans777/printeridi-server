@@ -19,6 +19,7 @@ from .print_time import Time
 from quantum3d.db import db, pdb
 from .gcode_parser import GCodeParser
 from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS
+from quantum3d.utility.cameras import Camera, captureImage
 
 
 class Machine:
@@ -886,6 +887,7 @@ class Machine:
         try:
             os.remove('backup_print.bc')
             os.remove('backup_print_path.bc')
+            pdb.set_key('sc_index', 0)
         except:
             print("file not removed!")
 
@@ -957,8 +959,8 @@ class Machine:
         self.append_gcode('G00', 4)  # G00 just for get a "OK"
 
     def take_photo_func(self):
-        pass
-        # TODO: take the frame here
+        # TODO: check functionality!
+        captureImage()
 
     def check_timelapse_status(self, current_x, current_y):
         if self.__take_timelapse:

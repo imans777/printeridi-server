@@ -53,9 +53,10 @@ class PickleDB:
             ('Y_pause_position', 0),
             ('X_timelapse_position', 0),
             ('Y_timelapse_position', 0),
+
+            ('sc_index', 0),
         ], False)
         self._init_values([
-            ('sc_index', 0),
             ('print_status', PrintStatus.IDLE.value),
             ('selected_camera', ''),
         ], True)
