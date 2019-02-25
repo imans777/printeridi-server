@@ -705,8 +705,8 @@ class Machine:
         self.append_gcode(gcode='M140 S0')
 
     def set_hotend_temp(self, value, toolhead_number=0):
-        if value+self.extruder_temp['point'] > 0:
-            # +self.extruder_temp['point']))
+        selected_extruder = self.extruder2_temp if toolhead_number == 1 else self.extruder_temp
+        if value + selected_extruder['point'] > 0:
             self.append_gcode(gcode='M104 S%d T%d' % (value, toolhead_number))
         else:
             self.append_gcode(gcode='M104 S0 T%d' % toolhead_number)

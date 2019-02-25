@@ -12,7 +12,8 @@ def heat():
         Request: {
             field: 'hotend' | 'bed',
             action: 'heat' | 'cooldown',
-            value: number
+            value: number,
+            ext_num?: 0 | 1             # the selected extruder (0 by default)
         }
         Response: {
             status: 'success' | 'failure'
@@ -21,7 +22,7 @@ def heat():
     data = request.json
     if data['field'] == 'hotend':
         if data['action'] == 'heat':
-            printer.set_hotend_temp(data['value'])
+            printer.set_hotend_temp(data['value'], data.get('ext_num') or 0)
         elif data['action'] == 'cooldown':
             printer.cooldown_hotend()
         else:
