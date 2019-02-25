@@ -69,11 +69,13 @@ class Machine:
         self.__current_Z_position = 0
         # self.ext_board = None
         self.use_filament_sensor = False
+        self.__take_timelapse = False
         self.filament_sensor_pin = 0
         self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
 
-        self.__take_timelapse = False
+        if pdb.get_key('timelapse'):
+            self.start_capture_timelapse()
 
         if pdb.get_key('filament'):
             self.sensor_filament_init()
