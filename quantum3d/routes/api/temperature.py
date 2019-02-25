@@ -10,8 +10,9 @@ def get_temperature():
     Returns the current and goal temperature of bed and extruder
     GET:
         Response: {
-            bed: {cur: number, goal: number},
-            ext: {cur: number, goal: number}
+            bed:    {cur: number, goal: number},
+            ext:    {cur: number, goal: number},
+            ext2? : {cur: number, goal: number}
         }
     """
     bed_temp = printer.get_bed_temp()
@@ -26,4 +27,10 @@ def get_temperature():
             'goal': ext_temp['point']
         }
     }
+    if printer.number_of_extruder == 2:
+        ext2_temp = printer.get_extruder2_temp()
+        data['ext2'] = {
+            'cur': ext2_temp['current'],
+            'goal': ext2_temp['point']
+        }
     return jsonify(data), 200

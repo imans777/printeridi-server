@@ -19,6 +19,7 @@ from .print_time import Time
 from quantum3d.db import db, pdb
 from .gcode_parser import GCodeParser
 from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS
+from quantum3d.utility.cameras import Camera, captureImage
 
 
 class Machine:
@@ -68,11 +69,13 @@ class Machine:
         self.__current_Z_position = 0
         # self.ext_board = None
         self.use_filament_sensor = False
+        self.__take_timelapse = False
         self.filament_sensor_pin = 0
         self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
 
-        self.__take_timelapse = False
+        if pdb.get_key('timelapse'):
+            self.start_capture_timelapse()
 
         if pdb.get_key('filament'):
             self.sensor_filament_init()
@@ -708,8 +711,8 @@ class Machine:
         self.append_gcode(gcode='M140 S0')
 
     def set_hotend_temp(self, value, toolhead_number=0):
-        if value+self.extruder_temp['point'] > 0:
-            # +self.extruder_temp['point']))
+        selected_extruder = self.extruder2_temp if toolhead_number == 1 else self.extruder_temp
+        if value + selected_extruder['point'] > 0:
             self.append_gcode(gcode='M104 S%d T%d' % (value, toolhead_number))
         else:
             self.append_gcode(gcode='M104 S0 T%d' % toolhead_number)
@@ -888,6 +891,7 @@ class Machine:
         try:
             os.remove('backup_print.bc')
             os.remove('backup_print_path.bc')
+            pdb.set_key('sc_index', 0)
         except:
             print("file not removed!")
 
@@ -960,8 +964,8 @@ class Machine:
         self.append_gcode('G00', 4)  # G00 just for get a "OK"
 
     def take_photo_func(self):
-        pass
-        # TODO: take the frame here
+        # TODO: check functionality!
+        captureImage()
 
     def check_timelapse_status(self, current_x, current_y):
         if self.__take_timelapse:
