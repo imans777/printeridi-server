@@ -548,10 +548,12 @@ class Machine:
                 self.append_gcode('G91')
                 self.append_gcode('G1 Z%f F%f' % (self.machine_settings['pause_Z_offset'],
                                                   self.machine_settings['pause_Z_move_feedrate']))
-                # self.append_gcode('G28 X Y')
+                
+                self.append_gcode('G90')
+
                 self.append_gcode('G1 X%d Y%d' % (
                     self.machine_settings['X_pause_position'], self.machine_settings['Y_pause_position']))
-                self.append_gcode('G90')
+                
 
                 while self.__pause_flag:
                     if self.__stop_flag:
@@ -950,6 +952,7 @@ class Machine:
         self.__take_timelapse = False
 
     def move_ext_for_take_photo(self, x_pos, y_pose):
+        self.append_gcode('G90')
         gcode = 'G1 X%f Y%f' % (x_pos, y_pose)
         self.append_gcode(gcode=gcode)
 
