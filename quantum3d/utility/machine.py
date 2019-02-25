@@ -143,8 +143,9 @@ class Machine:
                 # use_ext_board changed to use_filament_sensor
                 # this is for sensor filament
                 if self.use_filament_sensor:
-                    if self.__filament_pause_flag:
+                    if self.__filament_pause_flag and not self.__pause_flag:
                         self.__pause_flag = True
+                        print("!!! paused by filament error !!!")
 
                 if self.__Gcodes_to_run:
                     gcode_line = (
@@ -168,7 +169,7 @@ class Machine:
                                 self.extruder_temp['point'] = float(
                                     splited[2][1:])
                                 self.extruder2_temp['current'] = float(
-                                    splited[7][2:])
+                                    splited[7][3:])
                                 self.extruder2_temp['point'] = float(
                                     splited[8][1:])
                                 self.bed_temp['current'] = float(
@@ -203,7 +204,7 @@ class Machine:
                                 self.extruder_temp['current'] = float(
                                     splited[0][2:])
                                 self.extruder2_temp['current'] = float(
-                                    splited[6][2:])
+                                    splited[6][3:])
                                 self.bed_temp['current'] = float(
                                     splited[2][2:])
                                 data = self.machine_serial.readline().decode('utf-8')
@@ -231,7 +232,7 @@ class Machine:
                                 self.extruder_temp['current'] = float(
                                     splited[0][2:])
                                 self.extruder2_temp['current'] = float(
-                                    splited[6][2:])
+                                    splited[6][3:])
                                 data = self.machine_serial.readline().decode('utf-8')
                                 data = GCodeParser.remove_chomp(data)
                         elif self.number_of_extruder == 1:
