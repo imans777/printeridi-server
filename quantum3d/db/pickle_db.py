@@ -55,10 +55,10 @@ class PickleDB:
             ('Y_timelapse_position', 0),
 
             ('sc_index', 0),
+            ('selected_camera', os.environ.get('pi') or ''),
         ], False)
         self._init_values([
             ('print_status', PrintStatus.IDLE.value),
-            ('selected_camera', ''),
         ], True)
 
     def _init_values(self, values, force=False):
