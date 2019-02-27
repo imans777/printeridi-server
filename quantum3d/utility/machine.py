@@ -982,9 +982,6 @@ class Machine:
 
     def take_photo_gcode(self):
         self.append_gcode('G4 P500')
-        for i in range(self.machine_settings.get('printing_buffer') or 15):
-            self.append_gcode('G00')
-        self.append_gcode('G00')
         self.append_gcode('G4 P500', 4)
 
     def take_photo_func(self):
