@@ -16,7 +16,7 @@ class Camera(CameraBase):
             if not Camera.cameraObj:
                 with picamera.PiCamera() as camera:
                     Camera.cameraObj = camera
-                    time.sleep(2)
+                    # time.sleep(2)
             Camera.cameraObj.capture(dest, resize=resize)
         except Exception as e:
             print("pi camera capture err: ", e)
@@ -27,7 +27,7 @@ class Camera(CameraBase):
             with picamera.PiCamera() as camera:
                 # camera initialization
                 Camera.cameraObj = camera
-                time.sleep(2)
+                # time.sleep(2)
 
                 stream = io.BytesIO()
                 for _ in camera.capture_continuous(stream, 'jpeg', use_video_port=True):
