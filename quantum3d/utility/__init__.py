@@ -20,4 +20,4 @@ printer = Machine(
     pdb.get_key('extruders')
 )
 extra = Extra()
-print("-> Machine initialized")
+print("-> Utilities initialized")

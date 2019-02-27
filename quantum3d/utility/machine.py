@@ -955,12 +955,23 @@ class Machine:
 
     # to let the camera stay on
     def __capture_dummy_frame(self):
+        try:
+            print("first")
+            cam = pdb.get_key('selected_camera')
+            print("selected camera: ", cam)
+            camera = Camera[cam]()
+            print("camera init: ", camera)
+        except:
+            print("camera not inited")
+            time.sleep(0.5)
+            self.__capture_dummy_frame()
+            return
+
         while self.__take_timelapse:
             try:
-                cam = pdb.get_key('selected_camera')
-                frame = Camera[cam]().get_frame()
+                frame = camera.get_frame()
             except Exception as e:
-                print("capture dummy frame err: ", e)
+                print("frame not got: ", e)
 
     def end_capture_timelapse(self):
         self.__take_timelapse = False
