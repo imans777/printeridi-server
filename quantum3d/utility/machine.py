@@ -951,10 +951,12 @@ class Machine:
 
     def start_capture_timelapse(self):
         self.__take_timelapse = True
-        self.__capture_dummy_frame()
+        camera_thread = threading.Thread(self.__capture_dummy_frame)
+        camera_thread.start()
 
     # to let the camera stay on
     def __capture_dummy_frame(self):
+        print("!!! init timelapse camera !!!")
         try:
             cam = pdb.get_key('selected_camera')
             if not cam:
@@ -968,6 +970,7 @@ class Machine:
             return
         except Exception as e:
             print("capture dummy frame error: ", e)
+        print("!!! end timelapse camera !!!")
 
     def end_capture_timelapse(self):
         self.__take_timelapse = False
