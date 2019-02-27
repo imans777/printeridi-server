@@ -951,7 +951,7 @@ class Machine:
 
     def start_capture_timelapse(self):
         self.__take_timelapse = True
-        camera_thread = threading.Thread(self.__capture_dummy_frame)
+        camera_thread = threading.Thread(target=self.__capture_dummy_frame)
         camera_thread.start()
 
     # to let the camera stay on
