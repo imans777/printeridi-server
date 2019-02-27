@@ -552,12 +552,11 @@ class Machine:
                 self.append_gcode('G91')
                 self.append_gcode('G1 Z%f F%f' % (self.machine_settings['pause_Z_offset'],
                                                   self.machine_settings['pause_Z_move_feedrate']))
-                
+
                 self.append_gcode('G90')
 
                 self.append_gcode('G1 X%d Y%d' % (
                     self.machine_settings['X_pause_position'], self.machine_settings['Y_pause_position']))
-                
 
                 while self.__pause_flag:
                     if self.__stop_flag:
@@ -952,6 +951,12 @@ class Machine:
 
     def start_capture_timelapse(self):
         self.__take_timelapse = True
+        self.__capture_dummy_frame()
+
+    # to let the camera stay on
+    def __capture_dummy_frame(self):
+        while self.__take_timelapse:
+            frame = Camera[pdb.get_key('selected_camera')]().get_frame()
 
     def end_capture_timelapse(self):
         self.__take_timelapse = False
@@ -965,7 +970,6 @@ class Machine:
         self.append_gcode('G00', 4)  # G00 just for get a "OK"
 
     def take_photo_func(self):
-        # TODO: check functionality!
         captureImage()
 
     def check_timelapse_status(self, current_x, current_y):
