@@ -982,6 +982,7 @@ class Machine:
 
     def take_photo_gcode(self):
         self.append_gcode('G00', 4)  # G00 just for get a "OK"
+        self.append_gcode('G4 P1000')
 
     def take_photo_func(self):
         captureImage()
