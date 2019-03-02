@@ -4,20 +4,20 @@ from quantum3d.routes import api_bp as app
 from quantum3d.utility import Utils
 
 
-@app.route('/timelapse', methods=['POST', 'DELETE', 'OPTIONS'])
+@app.route('/timelapse', methods=['POST', 'PUT', 'OPTIONS'])
 def timelapse():
     """
     on OPTIONS returns a list of available timelapses
     POSTs a usb name and a directory name to
     export the taken timelapses to that usb
     or
-    DELETEs timelapses of a certain directory
+    PUT deletes timelapses of a certain directory
     POST:
       Request: {
         usbname: string,
         dirname: string
       }
-    DELETE:
+    PUT:
       Request: {
         dirname: string
       }
@@ -38,7 +38,7 @@ def timelapse():
         if Utils.export_timelapse_to_usb(dirname, usbname):
             return Response(status=200)
         abort(404)
-    elif request.method == 'DELETE':
+    elif request.method == 'PUT':
         if Utils.remove_timelapse_folder(dirname):
             return Response(status=200)
         abort(404)
