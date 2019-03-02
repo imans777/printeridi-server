@@ -27,7 +27,7 @@ def timelapse():
         return jsonify({'list': tls}), 200
 
     dirname = request.json.get('dirname')
-    if not dirname:
+    if not dirname: 
         abort(403)
 
     if request.method == 'POST':
