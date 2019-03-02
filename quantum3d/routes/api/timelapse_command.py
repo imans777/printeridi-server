@@ -22,7 +22,7 @@ def timelapse():
         dirname: string
       }
     """
-    if request.methods == 'OPTIONS':
+    if request.method == 'OPTIONS':
         tls = Utils.timelapse_list()
         return jsonify({'list': tls}), 200
 
@@ -30,7 +30,7 @@ def timelapse():
     if not dirname:
         abort(403)
 
-    if request.methods == 'POST':
+    if request.method == 'POST':
         usbname = request.json.get('usbname')
         if not usbname:
             abort(403)
@@ -38,7 +38,7 @@ def timelapse():
         if Utils.export_timelapse_to_usb(dirname, usbname):
             return Response(status=200)
         abort(404)
-    elif request.methods == 'DELETE':
+    elif request.method == 'DELETE':
         if Utils.remove_timelapse_folder(dirname):
             return Response(status=200)
         abort(404)
