@@ -127,7 +127,7 @@ class Utils():
     @staticmethod
     def get_usb_files(sub_dir):
         """ Returns all folders and 'gcode' files in the received directory """
-        sub_dir = BASE_PATH + '/' + sub_dir
+        sub_dir = os.path.join(BASE_PATH, sub_dir)
         files = os.listdir(sub_dir)
         folders, gcodes = [], []
         for name in files:
@@ -137,6 +137,15 @@ class Utils():
                 gcodes.append(str(name))
         for g in gcodes:
             folders.append(g)
+        return folders
+
+    @staticmethod
+    def timelapse_list():
+        tl_folders = os.listdir(SC_FULL_PATH)
+        folders = []
+        for name in tl_folders:
+            if os.path.isdir(os.path.join(tl_folders, name)):
+                folders.append(str(name))
         return folders
 
     @staticmethod
