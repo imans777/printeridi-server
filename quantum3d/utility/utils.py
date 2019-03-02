@@ -102,17 +102,25 @@ class Utils():
     @staticmethod
     def get_connected_usb():
         """ Returns a list of mounted USBs, if any """
-        # TODO:   check inside each folder and if they were empty,
-        # remove them from the list to avoid uncleaned empty usbs!
         sub_usb_dir = subprocess.Popen(
             ['ls', BASE_PATH], stdout=subprocess.PIPE).communicate()[0]
         sub_usb_dir = sub_usb_dir[:-1]
         if sub_usb_dir == '':
             return None
-        else:
-            sub_usb_dir = sub_usb_dir.split(b'\n')
-            sub_usb_dir = [x.decode('utf-8') for x in sub_usb_dir]
-            return sub_usb_dir
+
+        sub_usb_dir = sub_usb_dir.split(b'\n')
+        sub_usb_dir = [x.decode('utf-8') for x in sub_usb_dir]
+
+        # remove falsely-existing usbs! (empty folders that are not cleaned)
+        active_usb = []
+        for usb in sub_usb_dir:
+            output = os.popen('ls ' + os.path.join(BASE_PATH, usb)).read()
+            print(output)
+            if output:
+                active_usb.append(usb)
+            else:
+                os.popen('rm ' + os.path.join(BASE_PATH, usb)).read()
+        return active_usb
 
     @staticmethod
     def get_usb_files(sub_dir):
