@@ -115,13 +115,10 @@ class Utils():
         active_usb = []
         for usb in sub_usb_dir:
             try:
-                output = os.popen(
+                usb_content = os.popen(
                     'ls "' + os.path.join(BASE_PATH, usb) + '"').read()
-                print(output)
-                if output:
+                if usb_content:
                     active_usb.append(usb)
-                else:
-                    os.popen('rm "' + os.path.join(BASE_PATH, usb) + '"').read()
             except Exception as e:
                 print("error in checking active usbs: ", e)
         return active_usb
