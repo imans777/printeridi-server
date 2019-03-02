@@ -1,9 +1,10 @@
 import os
+import zipfile
 import configparser
 import time
 import subprocess
+from quantum3d.constants import BASE_PATH, SC_FULL_PATH
 
-BASE_PATH = os.environ.get('BASE_PATH') or '/media/pi'
 const_local = '127.0.0.1'
 
 
@@ -20,7 +21,7 @@ class Utils():
     def get_server_ip_django_only(request):
         ''' Returns server ip based on django's 'request' object '''
         ip = request.get_host().split(':')[0]
-        return '127.0.0.1' if ip == '0.0.0.0' else ip
+        return const_local if ip == '0.0.0.0' else ip
 
     @staticmethod
     def get_client_ip(request):
@@ -137,3 +138,37 @@ class Utils():
         for g in gcodes:
             folders.append(g)
         return folders
+
+    @staticmethod
+    def export_timelapse_to_usb(dir_name, usb_name):
+        try:
+            zipname = dir_name + '.zip'
+            zipf = zipfile.ZipFile(zipname, 'w', zipfile.ZIP_DEFLATED)
+
+            images = os.listdir(os.path.join(SC_FULL_PATH, dir_name))
+            for image in images:
+                zipf.write(os.path.join(
+                    SC_FULL_PATH,
+                    dir_name,
+                    image
+                ))
+            zipf.close()
+
+            os.popen('cp "{}" "{}"'.format(zipname, os.path.join(
+                BASE_PATH,
+                usb_name
+            )))
+            os.popen('rm "{}"'.format(zipname))
+            return True
+        except Exception as e:
+            print("error exporting timelapse: ", e)
+            return False
+
+    @staticmethod
+    def remove_timelapse_folder(dir_name):
+        try:
+            os.popen('rm "{}" -r'.format(os.path.join(SC_FULL_PATH, dir_name)))
+            return True
+        except Exception as e:
+            print("error removing timelapse folder: ", e)
+            return False

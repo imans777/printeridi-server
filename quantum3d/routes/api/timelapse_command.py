@@ -1,0 +1,40 @@
+from flask import request, json, Response, abort
+
+from quantum3d.routes import api_bp as app
+from quantum3d.utility import Utils
+
+
+@app.route('/timelapse', methods=['POST', 'DELETE'])
+def timelapse():
+    """
+    POSTs a usb name and a directory name to
+    export the taken timelapses to that usb
+    or
+    DELETEs timelapses of a certain directory
+    POST:
+      Request: {
+        usbname: string,
+        dirname: string
+      }
+    DELETE:
+      Request: {
+        dirname: string
+      }
+    """
+    dirname = request.json.get('dirname')
+
+    if not dirname:
+        abort(403)
+
+    if request.methods == 'POST':
+        usbname = request.json.get('usbname')
+        if not usbname:
+            abort(403)
+
+        if Utils.export_timelapse_to_usb(dirname, usbname):
+            return Response(status=200)
+        abort(404)
+    elif request.methods == 'DELETE':
+        if Utils.remove_timelapse_folder(dirname):
+            return Response(status=200)
+        abort(404)
