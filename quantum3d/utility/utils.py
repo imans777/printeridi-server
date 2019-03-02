@@ -114,12 +114,16 @@ class Utils():
         # remove falsely-existing usbs! (empty folders that are not cleaned)
         active_usb = []
         for usb in sub_usb_dir:
-            output = os.popen('ls ' + os.path.join(BASE_PATH, usb)).read()
-            print(output)
-            if output:
-                active_usb.append(usb)
-            else:
-                os.popen('rm ' + os.path.join(BASE_PATH, usb)).read()
+            try:
+                output = os.popen(
+                    'ls "' + os.path.join(BASE_PATH, usb) + '"').read()
+                print(output)
+                if output:
+                    active_usb.append(usb)
+                else:
+                    os.popen('rm "' + os.path.join(BASE_PATH, usb) + '"').read()
+            except Exception as e:
+                print("error in checking active usbs: ", e)
         return active_usb
 
     @staticmethod
