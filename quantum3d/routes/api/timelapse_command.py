@@ -27,7 +27,7 @@ def timelapse():
         return jsonify({'list': tls}), 200
 
     dirname = request.json.get('dirname')
-    if not dirname: 
+    if not dirname:
         abort(403)
 
     if request.method == 'POST':
@@ -38,7 +38,8 @@ def timelapse():
         if Utils.export_timelapse_to_usb(dirname, usbname):
             return Response(status=200)
         abort(404)
-    elif request.method == 'PUT':
+
+    if request.method == 'PUT':
         if Utils.remove_timelapse_folder(dirname):
             return Response(status=200)
         abort(404)

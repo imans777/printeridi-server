@@ -156,11 +156,7 @@ class Utils():
 
             images = os.listdir(os.path.join(SC_FULL_PATH, dir_name))
             for image in images:
-                zipf.write(os.path.join(
-                    SC_FULL_PATH,
-                    dir_name,
-                    image
-                ))
+                zipf.write(os.path.join(dir_name, image))
             zipf.close()
 
             os.popen('cp "{}" "{}"'.format(zipname, os.path.join(
