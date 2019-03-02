@@ -4,9 +4,10 @@ from quantum3d.routes import api_bp as app
 from quantum3d.utility import printer, extra
 
 
-@app.route('/move_axis', methods=['OPTIONS', 'POST'])
+@app.route('/move_axis', methods=['OPTIONS', 'POST', 'GET'])
 def move_axis():
     """
+    GETs the current position of axises
     On OPTIONS, checks if we have the access to move or not
     on POST, it moves if we were authorized to
     OPTIONS:
@@ -19,8 +20,12 @@ def move_axis():
             value: number
         }
     """
+    if request.method == 'GET':
+        return jsonify({'pos': printer.get_current_position()}), 200
+
     if request.method == 'OPTIONS':
         return jsonify({'access': extra.checkHomeAxisAccess()}), 200
+
     if request.method == 'POST':
         if not extra.checkHomeAxisAccess():
             abort(403)

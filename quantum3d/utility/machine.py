@@ -73,6 +73,7 @@ class Machine:
         self.filament_sensor_pin = 0
         self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
+        self.current_position = {'X': 0, 'Y': 0, 'Z': 0}
 
         if pdb.get_key('timelapse'):
             self.start_capture_timelapse()
@@ -996,8 +997,11 @@ class Machine:
 
     '''    handwheel methodes       '''
 
-    def set_handwheel_offset_position(self, X_pose, Y_pose, Z_pose):
-        self.append_gcode('M206 X-%d Y-%d Z-%d' % (X_pose, Y_pose, Z_pose))
+    def set_handwheel_offset_position(self, X_pos = 0, Y_pos = 0, Z_pos = 0):
+        self.append_gcode('M206 X-%d Y-%d Z-%d' % (X_pos, Y_pos, Z_pos))
 
     def deactive_handwheel_offset_position(self):
         self.append_gcode('M206 X0 Y0 Z0')
+
+    def get_current_position(self):  # TODO: update it
+        return self.current_position
