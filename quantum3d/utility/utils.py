@@ -144,7 +144,7 @@ class Utils():
         tl_folders = os.listdir(SC_FULL_PATH)
         folders = []
         for name in tl_folders:
-            if os.path.isdir(os.path.join(tl_folders, name)):
+            if os.path.isdir(os.path.join(SC_FULL_PATH, name)):
                 folders.append(str(name))
         return folders
 
