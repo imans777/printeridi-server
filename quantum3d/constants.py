@@ -92,7 +92,10 @@ MACHINE_SETTINGS_KEYS = [
     'Y_pause_position',
     # the position the toolhead should go when taking timelapse
     'X_timelapse_position',
-    'Y_timelapse_position',
+    'Y_timelapse_position', 
+    'retaction_offsset',
+    'retraction_feedrate',
+    'delay_time'
 ]
 
 # add settings keys to pickle available keys
