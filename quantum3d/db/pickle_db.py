@@ -53,6 +53,9 @@ class PickleDB:
             ('Y_pause_position', 0),
             ('X_timelapse_position', 0),
             ('Y_timelapse_position', 0),
+            ('retaction_offsset', 5),
+            ('retraction_feedrate', 1000),
+            ('delay_time', 500),
 
             ('sc_index', 0),
             ('selected_camera', os.environ.get('pi') or ''),

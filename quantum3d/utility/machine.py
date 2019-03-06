@@ -978,22 +978,29 @@ class Machine:
 
     def move_ext_for_take_photo(self, x_pos, y_pose):
         self.append_gcode('G90')
-        gcode = 'G1 X%f Y%f' % (x_pos, y_pose)
-        self.append_gcode(gcode=gcode)
+        self.append_gcode('G1 X%f Y%f' % (x_pos, y_pose))
+
+
+    def retract_nozzel(self,sign):
+        self.append_gcode('G91')
+        self.append_gcode('G1 E%s%d F%d'%(sign,self.machine_settings['retraction_offset'],self.machine_settings['retraction_feedrate']))
+        self.append_gcode('G90')
 
     def take_photo_gcode(self):
-        self.append_gcode('G4 P500')
-        self.append_gcode('G4 P500', 4)
+        self.append_gcode('G4 P%d'%self.machine_settings['delay_time'])
+        self.append_gcode('G4 P%d'%self.machine_settings['delay_time'], 4)
 
     def take_photo_func(self):
         captureImage()
 
     def check_timelapse_status(self, current_x, current_y):
         if self.__take_timelapse:
+            self.retract_nozzel('-')
             self.move_ext_for_take_photo(
                 self.machine_settings['X_timelapse_position'], self.machine_settings['Y_timelapse_position'])
             self.take_photo_gcode()
             self.move_ext_for_take_photo(current_x, current_y)
+            self.retract_nozzel('+')
 
     '''    handwheel methodes       '''
 
