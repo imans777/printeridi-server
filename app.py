@@ -19,7 +19,7 @@ if __name__ == '__main__':
     )
 
     # Run chromium if wasn't in development nor on windows and when lcd was requested
-    if os.environ['FLASK_ENV'] != 'development' and os.environ['CUR_ENV'].lower() == 'rpi' and pdb.get_key('lcd'):
+    if os.environ.get('FLASK_ENV') != 'development' and os.environ['CUR_ENV'].lower() == 'rpi' and pdb.get_key('lcd'):
         print('-> starting chromium')
         import subprocess
         subprocess.Popen(["chromium-browser", "--disk-cache-dir=/dev/null",

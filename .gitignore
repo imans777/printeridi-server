@@ -5,7 +5,7 @@ backup_print_path.bc
 *.db
 *.db-journal
 # NOTE: these should be ignored too
-#.env
+.env
 #quantum3d/static/ OR MAYBE JUST static/ ???
 #quantum3d/templates/ " " " "
 quantum3d/uploads/
