@@ -23,7 +23,8 @@ def general_settings():
     else:
         changed_fields = request.json
         for field in changed_fields:
-            pdb.set_key(field, changed_fields[field])
+            if changed_fields[field] is not None:
+                pdb.set_key(field, changed_fields[field])
         instantSettingChanges(changed_fields)
         return Response(status=200)
 
