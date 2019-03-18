@@ -18,7 +18,7 @@ from .print_time import Time
 # from .extended_board import ExtendedBoard
 from quantum3d.db import db, pdb
 from .gcode_parser import GCodeParser
-from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS
+from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS,SensorFilamentDetectionRegion
 from quantum3d.utility.cameras import Camera, captureImage
 
 
@@ -71,6 +71,7 @@ class Machine:
         self.use_filament_sensor = False
         self.__take_timelapse = False
         self.filament_sensor_pin = 0
+        self.filament_sensor_detection_region = SensorFilamentDetectionRegion.FALLING
         self.number_of_extruder = toolhead_number
         self.active_toolhead = 0
         self.current_position = {'X': 0, 'Y': 0, 'Z': 0}
@@ -296,7 +297,9 @@ class Machine:
 
         ''' read files lines'''
         for line in gcode_file:
-            lines.append(GCodeParser.remove_chomp(line))
+            gcode = GCodeParser.remove_comment(GCodeParser.remove_chomp(line))
+            if gcode != None:
+                lines.append(gcode)
 
         '''hibernate mode'''
         if line_to_go != 0:
@@ -913,9 +916,16 @@ class Machine:
         try:
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
-            GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-            GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
-                                  callback=self.filament_sensor_event, bouncetime=300)
+            
+            if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
+                GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+                GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
+                                    callback=self.filament_sensor_event, bouncetime=300)
+            elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
+                GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+                GPIO.add_event_detect(BCM_pin_number, GPIO.RISING,
+                                    callback=self.filament_sensor_event, bouncetime=300)
+
             self.use_filament_sensor = True
         except Exception as e:
             print('error in sensor_filament_init', e)
@@ -928,18 +938,31 @@ class Machine:
             print('error in disable_sensor_filament', e)
 
     def filament_sensor_event(self, channel):
-        if GPIO.input(self.filament_sensor_pin) == 0:
-            self.__filament_pause_flag = True
-            print('!!! filament sensor event called !!!')
+        if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
+            if GPIO.input(self.filament_sensor_pin) == 0:
+                self.__filament_pause_flag = True
+                print('!!! filament sensor event called !!!')
+        elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
+            if GPIO.input(self.filament_sensor_pin) == 1:
+                self.__filament_pause_flag = True
+                print('!!! filament sensor event called !!!')
 
     def check_for_filament_manually(self, BCM_pin_number):
         try:
-            if GPIO.input(BCM_pin_number):  # on HIGH
-                return True
-            else:  # on LOW
-                self.__filament_pause_flag = True
-                print('!!! filament manually detected no filament !!!')
-                return False
+            if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
+                if GPIO.input(BCM_pin_number):  # on HIGH
+                    return True
+                else:  # on LOW
+                    self.__filament_pause_flag = True
+                    print('!!! filament manually detected no filament !!!')
+                    return False
+            elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
+                if not GPIO.input(BCM_pin_number):  # on LOW
+                    return True
+                else:  # on HIGH
+                    self.__filament_pause_flag = True
+                    print('!!! filament manually detected no filament !!!')
+                    return False
         except Exception as e:
             print('error in check_for_filament_manually', e)
 

@@ -107,3 +107,7 @@ class PrintStatus(Enum):
     IDLE = 0        # init | on print stop
     PRINTING = 1    # other conditions
     PAUSED = 2      # on print pause
+
+class SensorFilamentDetectionRegion(Enum):
+    RISING = 0        
+    FALLING = 1    
