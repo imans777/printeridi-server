@@ -309,7 +309,7 @@ class Machine:
                 if 'T' in parse_line:
                     self.active_toolhead = int(parse_line['T'])
                 elif 'M' in parse_line:
-                    if parse_line['M'] == '190':
+                    if parse_line['M'] == '109':
                         if 'T' in parse_line:
                             if parse_line['T'] == 0:
                                 self.extruder_temp['point'] = int(
