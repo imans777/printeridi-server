@@ -47,6 +47,9 @@ class Utils():
             e.g. ['192.168.0.0', '192.168.0.1'] '''
         try:
             time.sleep(1)
+            if os.environ.get('CUR_ENV', 'rpi') == 'win':
+                raise Exception('OS_NOT_SUPPORTED')
+
             ips = os.popen('sudo hostname -I').read()
             return ips.split()
         except Exception as e:
@@ -85,6 +88,9 @@ class Utils():
         ''' Returns a list of available wifis, if any '''
         try:
             # it's not always wlp2s0. on raspberry: wlan0
+            if os.environ.get('CUR_ENV', 'rpi') == 'win':
+                raise Exception('OS_NOT_SUPPORTED')
+
             x = os.popen('sudo iw dev wlan0 scan | grep SSID').read()
             y = [m.split() for m in x.split('\n')]
             res = []
