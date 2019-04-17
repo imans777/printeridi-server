@@ -10,14 +10,15 @@ class GCodeParser:
         gcode = gcode.split(';')
         if gcode[0] == '':
 
-            cura_layer = gcode.find(';LAYER:')
+            cura_layer = gcode[1].find('LAYER:')
             if cura_layer == 0:
-                layer = gcode[7:]
+                layer = int(gcode[1].split('LAYER:')[1])
                 return 'L%d'%layer
 
-            simplify_layer = lines[x].find('; layer')
+            simplify_layer = gcode[1].find(' layer ')
             if simplify_layer == 0:
-                layer = lines[x][8:lines[x].find(',')]
+                layer = gcode[1].split(' layer ')[1][:gcode[1].find(',')]
+                # layer = gcode[1][8:gcode[1].find(',')]
                 return 'L%d'%layer
 
             return None
