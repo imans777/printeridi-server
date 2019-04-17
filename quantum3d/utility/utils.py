@@ -194,7 +194,7 @@ class Utils():
     def autofind_printer_serial_port():
         try:
             ports = [tuple(p)
-                     for p in list(serial.tools.list_ports.comports())]
+                     for p in list(serial.tools.list_ports.comports())][0]
             return ports[0]
         except:
             return None
