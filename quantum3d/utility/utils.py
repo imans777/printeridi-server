@@ -3,6 +3,8 @@ import zipfile
 import configparser
 import time
 import subprocess
+import serial
+import serial.tools.list_ports
 from quantum3d.constants import BASE_PATH, SC_FULL_PATH
 
 const_local = '127.0.0.1'
@@ -187,3 +189,12 @@ class Utils():
         except Exception as e:
             print("error removing timelapse folder: ", e)
             return False
+
+    @staticmethod
+    def autofind_printer_serial_port():
+        try:
+            ports = [tuple(p)
+                     for p in list(serial.tools.list_ports.comports())]
+            return ports[0]
+        except:
+            return None
