@@ -898,7 +898,8 @@ class Machine:
             backup_print.close()
             backup_print_path.close()
             return True, [backup_file_path, backup_line]
-        except:
+        except Exception as e:
+            print("error returning backup files and lines: ", e)
             return False, None
 
     def delete_last_print_files(self):
