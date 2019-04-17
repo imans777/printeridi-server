@@ -9,6 +9,17 @@ class GCodeParser:
     def remove_comment(gcode):
         gcode = gcode.split(';')
         if gcode[0] == '':
+
+            cura_layer = gcode.find(';LAYER:')
+            if cura_layer == 0:
+                layer = gcode[7:]
+                return 'L%d'%layer
+
+            simplify_layer = lines[x].find('; layer')
+            if simplify_layer == 0:
+                layer = lines[x][8:lines[x].find(',')]
+                return 'L%d'%layer
+
             return None
         else:
             return gcode[0]

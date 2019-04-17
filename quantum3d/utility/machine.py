@@ -395,28 +395,38 @@ class Machine:
             #         print ('!!! paused by filament error !!!')
 
             try:
+                
+                layer_num = lines[x].find('L')
+                if layer_num == 0:
+                    backup_print = open('backup_print.bc', 'w')
+                    backup_print.write(lines[x][1:])
+                    print('layer found %d'%lines[x][1:])
+                    backup_print.close()
+                    self.check_timelapse_status(X_pos, Y_pos)
+
+
                 signnum = lines[x].find(';')
                 if not lines[x]:
                     pass
                 elif signnum == -1:
                     command = lines[x]
                 elif signnum == 0:
+                    pass
+                    # cura_layer = lines[x].find(';LAYER:')
+                    # if cura_layer == 0:
+                    #     layer = lines[x][7:]
+                    #     backup_print = open('backup_print.bc', 'w')
+                    #     backup_print.write(layer)
+                    #     backup_print.close()
+                    #     self.check_timelapse_status(X_pos, Y_pos)
 
-                    cura_layer = lines[x].find(';LAYER:')
-                    if cura_layer == 0:
-                        layer = lines[x][7:]
-                        backup_print = open('backup_print.bc', 'w')
-                        backup_print.write(layer)
-                        backup_print.close()
-                        self.check_timelapse_status(X_pos, Y_pos)
-
-                    simplify_layer = lines[x].find('; layer')
-                    if simplify_layer == 0:
-                        layer = lines[x][8:lines[x].find(',')]
-                        backup_print = open('backup_print.bc', 'w')
-                        backup_print.write(layer)
-                        backup_print.close()
-                        self.check_timelapse_status(X_pos, Y_pos)
+                    # simplify_layer = lines[x].find('; layer')
+                    # if simplify_layer == 0:
+                    #     layer = lines[x][8:lines[x].find(',')]
+                    #     backup_print = open('backup_print.bc', 'w')
+                    #     backup_print.write(layer)
+                    #     backup_print.close()
+                    #     self.check_timelapse_status(X_pos, Y_pos)
 
                 else:
                     command = GCodeParser.remove_comment(lines[x])
