@@ -395,16 +395,6 @@ class Machine:
             #         print ('!!! paused by filament error !!!')
 
             try:
-                
-                layer_num = lines[x].find('L')
-                if layer_num == 0:
-                    backup_print = open('backup_print.bc', 'w')
-                    backup_print.write(lines[x][1:])
-                    print('layer found %d'%lines[x][1:])
-                    backup_print.close()
-                    self.check_timelapse_status(X_pos, Y_pos)
-
-
                 signnum = lines[x].find(';')
                 if not lines[x]:
                     pass
@@ -441,6 +431,15 @@ class Machine:
 
                     if 'T' in parse_command:  # T code
                         self.active_toolhead = int(parse_command['M'])
+                        
+                    
+                    elif 'L' in parse_command: # layer we found in gcode remove comment
+                        backup_print = open('backup_print.bc', 'w')
+                        backup_print.write(parse_command['L'])
+                        print('layer found %s'%parse_command['L'])
+                        backup_print.close()
+                        self.check_timelapse_status(X_pos, Y_pos)
+
 
                     elif 'M' in parse_command:  # M codes
 
