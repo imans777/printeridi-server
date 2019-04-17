@@ -360,10 +360,12 @@ class Machine:
             '''find the layer that had been printed'''
             for i in range(len(lines)):
                 try:
-                    for line in lines:
-                        parse_line = GCodeParser.parse(line)
+                    for i in range(len(lines)):
+                        parse_line = GCodeParser.parse(lines[i])
                         if 'L' in parse_line:
-                            line_to_go = int(parse_line['L'])
+                            if line_to_go == int(parse_line['L']):
+                                line_to_go = i
+                                break
 
                 except Exception as e:
                     print('error in find line: ', e)
