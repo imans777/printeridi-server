@@ -9,18 +9,19 @@ class GCodeParser:
     def remove_comment(gcode):
         gcode = gcode.split(';')
         if gcode[0] == '':
+            try:
+                cura_layer = gcode[1].find('LAYER:')
+                if cura_layer == 0:
+                    layer = int(gcode[1].split('LAYER:')[1])
+                    return 'L%d'%layer
 
-            cura_layer = gcode[1].find('LAYER:')
-            if cura_layer == 0:
-                layer = int(gcode[1].split('LAYER:')[1])
-                return 'L%d'%layer
-
-            simplify_layer = gcode[1].find(' layer ')
-            if simplify_layer == 0:
-                layer = gcode[1].split(' layer ')[1][:gcode[1].find(',')]
-                # layer = gcode[1][8:gcode[1].find(',')]
-                return 'L%d'%layer
-
+                simplify_layer = gcode[1].find(' layer ')
+                if simplify_layer == 0:
+                    layer = gcode[1].split(' layer ')[1][:gcode[1].find(',')]
+                    # layer = gcode[1][8:gcode[1].find(',')]
+                    return 'L%d'%layer
+            except Exception  as e:
+                print(" in gcodeparser remove comment %s"%e)
             return None
         else:
             return gcode[0]
