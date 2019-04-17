@@ -360,14 +360,11 @@ class Machine:
             '''find the layer that had been printed'''
             for i in range(len(lines)):
                 try:
-                    if lines[i].find(';LAYER:') == 0:
-                        if line_to_go == int(lines[i][7:]):
-                            '''get the direct gcode line (the past value was the layer that has been printed)'''
-                            line_to_go = i
-                    elif lines[i].find('; layer') == 0:
-                        if line_to_go == int(lines[i][8:lines[i].find(',')]):
-                            '''get the direct gcode line (the past value was the layer that has been printed)'''
-                            line_to_go = i
+                    for line in lines:
+                        parse_line = GCodeParser.parse(line)
+                        if 'L' in parse_line:
+                            line_to_go = int(parse_line['L'])
+                            
                 except Exception as e:
                     print('error in find line: ', e)
 
@@ -431,7 +428,7 @@ class Machine:
 
                     if 'T' in parse_command:  # T code
                         self.active_toolhead = int(parse_command['M'])
-                        
+
                     
                     elif 'L' in parse_command: # layer we found in gcode remove comment
                         backup_print = open('backup_print.bc', 'w')
