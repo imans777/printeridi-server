@@ -1,7 +1,11 @@
 from .camera_base import CameraBase
-import pygame
-import pygame.camera
-from pygame.locals import *
+
+try:
+    import pygame
+    import pygame.camera
+    from pygame.locals import *
+except:
+    print("Could not import PyGame")
 import time
 
 

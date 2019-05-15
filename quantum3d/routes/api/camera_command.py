@@ -6,8 +6,12 @@ from quantum3d.db import pdb
 from quantum3d.constants import SC_FULL_PATH
 import os
 import subprocess
-import pygame
-import pygame.camera
+
+try:
+    import pygame
+    import pygame.camera
+except:
+    print("Could not import 'PyGame'. Camera Will not be available")
 
 
 def getLastFrame(camera):
@@ -44,37 +48,48 @@ def cameraList():
             }[]
         }
     '''
+    try:
+        pygame.camera.init()
+        camlist = pygame.camera.list_cameras()
 
-    pygame.camera.init()
-    camlist = pygame.camera.list_cameras()
+        vc_out = subprocess.Popen(
+            ['vcgencmd', 'get_camera'], stdout=subprocess.PIPE).communicate()[0]
+        vc_out = vc_out.split(b'\n')[0].decode('utf-8').split(' ')
+        supp = []
+        for item in vc_out:
+            supp.append(item.split('=')[1])
+        if all(x == '1' for x in supp):
+            camlist.append('pi')
 
-    vc_out = subprocess.Popen(
-        ['vcgencmd', 'get_camera'], stdout=subprocess.PIPE).communicate()[0]
-    vc_out = vc_out.split(b'\n')[0].decode('utf-8').split(' ')
-    supp = []
-    for item in vc_out:
-        supp.append(item.split('=')[1])
-    if all(x == '1' for x in supp):
-        camlist.append('pi')
-
-    res = {'cameras': []}
-    idx = 0
-    for item in camlist:
-        if item == 'pi':
-            res['cameras'].append({
-                'name': 'Pi-Camera',
-                'link': 'pi',
-                'icon': '/static/assets/rpicamera.png'
-            })
-        else:
-            # TODO: for now the show code is not working!
-            # res['cameras'].append({
-            #     'name': 'Webcam',
-            #     'link': 'webcam' + str(idx),
-            #     'icon': '/static/assets/webcam.png'
-            # })
-            idx += 1
-    return jsonify(res)
+        res = {'cameras': []}
+        idx = 0
+        for item in camlist:
+            if item == 'pi':
+                res['cameras'].append({
+                    'name': 'Pi-Camera',
+                    'link': 'pi',
+                    'icon': '/static/assets/rpicamera.png'
+                })
+            else:
+                # TODO: for now the show code is not working!
+                # res['cameras'].append({
+                #     'name': 'Webcam',
+                #     'link': 'webcam' + str(idx),
+                #     'icon': '/static/assets/webcam.png'
+                # })
+                idx += 1
+        return jsonify(res)
+    except Exception as e:
+        print("error reading camera list: ", e)
+        return jsonify({
+            'cameras': [
+                {
+                    'name': 'Pi-Camera',
+                    'link': 'pi',
+                    'icon': '/static/assets/rpicamera.png'
+                }
+            ]
+        })
 
 
 @app.route('/camera-set', methods=['POST'])

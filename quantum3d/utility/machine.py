@@ -18,7 +18,7 @@ from .print_time import Time
 # from .extended_board import ExtendedBoard
 from quantum3d.db import db, pdb
 from .gcode_parser import GCodeParser
-from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS,SensorFilamentDetectionRegion
+from quantum3d.constants import BASE_PATH, UPLOAD_PROTOCOL, UPLOAD_FULL_PATH, MACHINE_SETTINGS_KEYS, SensorFilamentDetectionRegion
 from quantum3d.utility.cameras import Camera, captureImage
 
 
@@ -364,7 +364,7 @@ class Machine:
                         parse_line = GCodeParser.parse(line)
                         if 'L' in parse_line:
                             line_to_go = int(parse_line['L'])
-                            
+
                 except Exception as e:
                     print('error in find line: ', e)
 
@@ -429,14 +429,12 @@ class Machine:
                     if 'T' in parse_command:  # T code
                         self.active_toolhead = int(parse_command['M'])
 
-                    
-                    elif 'L' in parse_command: # layer we found in gcode remove comment
+                    elif 'L' in parse_command:  # layer we found in gcode remove comment
                         backup_print = open('backup_print.bc', 'w')
                         backup_print.write(parse_command['L'])
-                        print('layer found %s'%parse_command['L'])
+                        print('layer found %s' % parse_command['L'])
                         backup_print.close()
                         self.check_timelapse_status(X_pos, Y_pos)
-
 
                     elif 'M' in parse_command:  # M codes
 
@@ -923,15 +921,15 @@ class Machine:
         try:
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
-            
+
             if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
                 GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
                 GPIO.add_event_detect(BCM_pin_number, GPIO.FALLING,
-                                    callback=self.filament_sensor_event, bouncetime=300)
+                                      callback=self.filament_sensor_event, bouncetime=300)
             elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
                 GPIO.setup(BCM_pin_number, GPIO.IN, pull_up_down=GPIO.PUD_UP)
                 GPIO.add_event_detect(BCM_pin_number, GPIO.RISING,
-                                    callback=self.filament_sensor_event, bouncetime=300)
+                                      callback=self.filament_sensor_event, bouncetime=300)
 
             self.use_filament_sensor = True
         except Exception as e:
@@ -945,14 +943,17 @@ class Machine:
             print('error in disable_sensor_filament', e)
 
     def filament_sensor_event(self, channel):
-        if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
-            if GPIO.input(self.filament_sensor_pin) == 0:
-                self.__filament_pause_flag = True
-                print('!!! filament sensor event called !!!')
-        elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
-            if GPIO.input(self.filament_sensor_pin) == 1:
-                self.__filament_pause_flag = True
-                print('!!! filament sensor event called !!!')
+        try:
+            if self.filament_sensor_detection_region == SensorFilamentDetectionRegion.FALLING:
+                if GPIO.input(self.filament_sensor_pin) == 0:
+                    self.__filament_pause_flag = True
+                    print('!!! filament sensor event called !!!')
+            elif self.filament_sensor_detection_region == SensorFilamentDetectionRegion.RISING:
+                if GPIO.input(self.filament_sensor_pin) == 1:
+                    self.__filament_pause_flag = True
+                    print('!!! filament sensor event called !!!')
+        except Exception as e:
+            print("error in filament sensor event: ", e)
 
     def check_for_filament_manually(self, BCM_pin_number):
         try:
@@ -1010,15 +1011,15 @@ class Machine:
         self.append_gcode('G90')
         self.append_gcode('G1 X%f Y%f' % (x_pos, y_pose))
 
-
-    def retract_nozzel(self,sign):
+    def retract_nozzel(self, sign):
         self.append_gcode('G91')
-        self.append_gcode('G1 E%s%d F%d'%(sign,self.machine_settings['retraction_offset'],self.machine_settings['retraction_feedrate']))
+        self.append_gcode('G1 E%s%d F%d' % (
+            sign, self.machine_settings['retraction_offset'], self.machine_settings['retraction_feedrate']))
         self.append_gcode('G90')
 
     def take_photo_gcode(self):
-        self.append_gcode('G4 P%d'%self.machine_settings['delay_time'])
-        self.append_gcode('G4 P%d'%self.machine_settings['delay_time'], 4)
+        self.append_gcode('G4 P%d' % self.machine_settings['delay_time'])
+        self.append_gcode('G4 P%d' % self.machine_settings['delay_time'], 4)
 
     def take_photo_func(self):
         captureImage()
@@ -1034,7 +1035,7 @@ class Machine:
 
     '''    handwheel methodes       '''
 
-    def set_handwheel_offset_position(self, X_pos = 0, Y_pos = 0, Z_pos = 0):
+    def set_handwheel_offset_position(self, X_pos=0, Y_pos=0, Z_pos=0):
         self.append_gcode('M206 X-%d Y-%d Z-%d' % (X_pos, Y_pos, Z_pos))
 
     def deactive_handwheel_offset_position(self):
