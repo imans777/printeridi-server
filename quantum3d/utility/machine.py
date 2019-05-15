@@ -360,10 +360,11 @@ class Machine:
             '''find the layer that had been printed'''
             for i in range(len(lines)):
                 try:
-                    for line in lines:
-                        parse_line = GCodeParser.parse(line)
-                        if 'L' in parse_line:
-                            line_to_go = int(parse_line['L'])
+                    parse_line = GCodeParser.parse(lines[i])
+                    if 'L' in parse_line:
+                        if line_to_go == int(parse_line['L']):
+                            line_to_go = i
+                            break
 
                 except Exception as e:
                     print('error in find line: ', e)
@@ -435,6 +436,7 @@ class Machine:
                         print('layer found %s' % parse_command['L'])
                         backup_print.close()
                         self.check_timelapse_status(X_pos, Y_pos)
+                        command = -1
 
                     elif 'M' in parse_command:  # M codes
 
@@ -546,8 +548,8 @@ class Machine:
                                 parse_command['Z'] = str(z_pos)
                                 command = GCodeParser.rebuild_gcode(
                                     parse_command)
-
-                    self.append_gcode(command)
+                    if command != -1:
+                        self.append_gcode(command)
                     command = None
             except Exception as e:
                 print("error inside read_file_gcode: ", e)
