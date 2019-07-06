@@ -1,8 +1,3 @@
-"""
-Machine utils for printer connection 
-programmer = SHB
-"""
-
 import serial
 import time
 import threading
@@ -301,7 +296,7 @@ class Machine:
             if gcode != None:
                 lines.append(gcode)
 
-        '''hibernate mode'''
+        ''' hibernate mode '''
         if line_to_go != 0:
 
             '''                   first heat up the nozzles and bed                  '''
@@ -349,6 +344,14 @@ class Machine:
                     break
 
             '''               second smart hibernate                          '''
+            
+            algorithm = pdb.get_key('smart_hibernate_algorithm')
+            
+            # TODO: SHB - the addresses must be dynamic 
+            if algorithm == 'circular':
+                self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
+            elif algorithm == 'linear':
+                self.__read_file_gcode_lines('./smart_hibernate_algorithms/linear_pattern.gcode')
 
             '''                     third homing                              '''
             self.append_gcode('G91')

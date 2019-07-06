@@ -57,6 +57,8 @@ class PickleDB:
             ('retraction_feedrate', 1000),
             ('delay_time', 500),
 
+            ('smart_hibernate_algorithm', 'circular'), # SHB - it can be 'circular' or 'linear'
+
             ('sc_index', 0),
             ('selected_camera', os.environ.get('pi') or ''),
         ], False)
