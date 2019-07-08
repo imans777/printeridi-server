@@ -1,0 +1,11 @@
+sudo pip3 install python-dotenv
+sudo pip3 install colorlog
+sudo pip3 install Flask-SocketIO
+sudo pip3 install Flask-Cors
+sudo pip3 install pickledb
+sudo pip3 install psutil
+sudo pip3 install Shortid
+
+
+
+
