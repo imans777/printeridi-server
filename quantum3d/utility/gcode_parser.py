@@ -17,8 +17,8 @@ class GCodeParser:
 
                 simplify_layer = gcode[1].find(' layer ')
                 if simplify_layer == 0:
-                    layer = int(gcode[1].split(' layer ')
-                                [1][:gcode[1].find(',')])
+                    layer = gcode[1].split(' layer ')[1]
+                    layer = int(layer[:layer.find(',')])
                     # layer = gcode[1][8:gcode[1].find(',')]
                     return 'L%d' % layer
             except Exception as e:
