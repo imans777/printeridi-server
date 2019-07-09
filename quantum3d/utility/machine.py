@@ -811,9 +811,6 @@ class Machine:
         self.time = Time()
         self.printing_file = str(gcode_dir).split(os.path.sep)[-1]
 
-        '''get a backup from gcode file path for hibernate '''
-        with open('backup_print_path.bc', 'w') as backup_print:
-            backup_print.write(gcode_dir)
 
         if str(gcode_dir).startswith(UPLOAD_PROTOCOL):
             gcode_dir = os.path.join(UPLOAD_FULL_PATH,
@@ -821,6 +818,12 @@ class Machine:
         else:
             gcode_dir = os.path.join(self.base_path, gcode_dir)
 
+
+        '''get a backup from gcode file path for hibernate '''
+        with open('backup_print_path.bc', 'w') as backup_print:
+            backup_print.write(gcode_dir)
+
+            
         # gcode_dir is now the COMPLETE FULL PATH to the file
         print('@@@ printing file dir:', gcode_dir)
         read_file_gcode_lines_thread = threading.Thread(
