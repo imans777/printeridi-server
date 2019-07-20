@@ -150,7 +150,7 @@ class Machine:
                 if self.__Gcodes_to_run:
                     gcode_line = (
                         self.__Gcodes_to_run[0] + '\n').encode('utf-8')
-                    print('send to machine', gcode_line , self.__Gcodes_to_run[1] )
+                    print('send to machine', gcode_line , self.__Gcodes_return[0] )
                     self.machine_serial.write(gcode_line)
                     if self.__Gcodes_return[0] == 0:
                         while self.machine_serial.readline() != 'ok\n'.encode('utf-8'):
@@ -409,10 +409,11 @@ class Machine:
                 elif signnum == -1:
                     command = lines[x]
                 elif signnum == 0:
-                    command = None
+                    command = -1
                 else:
                     command = GCodeParser.remove_comment(lines[x])
 
+                print('the cleaned command is : ',command)
                 '''gcode sending to printer'''
                 if command:
 
