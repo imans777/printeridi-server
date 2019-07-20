@@ -227,6 +227,7 @@ class Machine:
                         if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            print('here in m109 reading started with 2 nozzel')
                             while data != 'ok':
                                 splited = data.split(' ')
                                 self.extruder_temp['current'] = float(
@@ -238,7 +239,7 @@ class Machine:
                         elif self.number_of_extruder == 1:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
-                            print('here in m109 reading started')
+                            print('here in m109 reading started with 1 nozzel')
                             while data != 'ok':
                                 splited = data.split(' ')
                                 print(splited)
@@ -408,26 +409,9 @@ class Machine:
                 elif signnum == -1:
                     command = lines[x]
                 elif signnum == 0:
-                    pass
-                    # cura_layer = lines[x].find(';LAYER:')
-                    # if cura_layer == 0:
-                    #     layer = lines[x][7:]
-                    #     backup_print = open('backup_print.bc', 'w')
-                    #     backup_print.write(layer)
-                    #     backup_print.close()
-                    #     self.check_timelapse_status(X_pos, Y_pos)
-
-                    # simplify_layer = lines[x].find('; layer')
-                    # if simplify_layer == 0:
-                    #     layer = lines[x][8:lines[x].find(',')]
-                    #     backup_print = open('backup_print.bc', 'w')
-                    #     backup_print.write(layer)
-                    #     backup_print.close()
-                    #     self.check_timelapse_status(X_pos, Y_pos)
-
+                    command = None
                 else:
                     command = GCodeParser.remove_comment(lines[x])
-                    # lines[x][:-(len(lines[x]) - signnum)]
 
                 '''gcode sending to printer'''
                 if command:
