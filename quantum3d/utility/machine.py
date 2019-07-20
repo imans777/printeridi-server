@@ -424,7 +424,7 @@ class Machine:
                     if 'T' in parse_command:  # T code
                         self.active_toolhead = int(parse_command['T'])
 
-                    elif 'L' in parse_command:  # layer we found in gcode remove comment
+                    if 'L' in parse_command:  # layer we found in gcode remove comment
                         backup_print = open('backup_print.bc', 'w')
                         backup_print.write(parse_command['L'])
                         print('layer found %s' % parse_command['L'])
