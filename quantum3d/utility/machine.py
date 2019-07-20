@@ -227,7 +227,6 @@ class Machine:
                         if self.number_of_extruder == 2:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
-                            print('here in m109 reading started with 2 nozzel')
                             while data != 'ok':
                                 splited = data.split(' ')
                                 self.extruder_temp['current'] = float(
@@ -239,10 +238,8 @@ class Machine:
                         elif self.number_of_extruder == 1:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
-                            print('here in m109 reading started with 1 nozzel')
                             while data != 'ok':
                                 splited = data.split(' ')
-                                print(splited)
                                 self.extruder_temp['current'] = float(
                                     splited[0][2:])
                                 data = self.machine_serial.readline().decode('utf-8')
@@ -413,7 +410,7 @@ class Machine:
                 else:
                     command = GCodeParser.remove_comment(lines[x])
 
-                print('the cleaned command is : ',command)
+                # print('the cleaned command is : ',command)
                 '''gcode sending to printer'''
                 if command:
 
@@ -443,7 +440,6 @@ class Machine:
                             command = -1
 
                         elif parse_command['M'] == '109':  # for M109
-                            print('found M-code')
                             if self.active_toolhead == 0:
                                 self.extruder_temp['point'] = int(
                                     float(parse_command['S']))
