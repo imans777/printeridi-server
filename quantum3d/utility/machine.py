@@ -422,7 +422,7 @@ class Machine:
                     parse_command = GCodeParser.parse(command)
 
                     if 'T' in parse_command:  # T code
-                        self.active_toolhead = int(parse_command['M'])
+                        self.active_toolhead = int(parse_command['T'])
 
                     elif 'L' in parse_command:  # layer we found in gcode remove comment
                         backup_print = open('backup_print.bc', 'w')
