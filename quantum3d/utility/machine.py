@@ -150,7 +150,7 @@ class Machine:
                 if self.__Gcodes_to_run:
                     gcode_line = (
                         self.__Gcodes_to_run[0] + '\n').encode('utf-8')
-                    print('send to machine', gcode_line)
+                    print('send to machine', gcode_line , self.__Gcodes_to_run[1] )
                     self.machine_serial.write(gcode_line)
                     if self.__Gcodes_return[0] == 0:
                         while self.machine_serial.readline() != 'ok\n'.encode('utf-8'):
