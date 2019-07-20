@@ -439,10 +439,13 @@ class Machine:
                                 float(parse_command['S']))
                             self.append_gcode('M190 S%f' %
                                               (self.bed_temp['point']), 2)
+                            command = -1
 
                         elif parse_command['M'] == '109':  # for M109
+                            print('found M-code')
                             if 'T' in parse_command:
                                 if parse_command['T'] == 0:
+                                    print('found  T in M-code')
                                     self.extruder_temp['point'] = int(
                                         float(parse_command['S']))
                                     self.append_gcode('M109 S%f T0' % (
@@ -463,6 +466,7 @@ class Machine:
                                         float(parse_command['S']))
                                     self.append_gcode('M109 S%f T1' % (
                                         self.extruder2_temp['point']), 3)
+                            command = -1
 
                         elif parse_command['M'] == '106':  # for M106
                             self.speed['fan'] = int(float(parse_command['S']))
