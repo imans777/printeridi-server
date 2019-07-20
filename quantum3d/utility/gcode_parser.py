@@ -23,7 +23,7 @@ class GCodeParser:
                     # layer = gcode[1][8:gcode[1].find(',')]
                     return 'L%d' % layer
             except Exception as e:
-                print(" in gcodeparser remove comment %s" % e)
+                print(" in gcodeparser remove comment %s" % e,gcode)
             return None
         else:
             return gcode[0]

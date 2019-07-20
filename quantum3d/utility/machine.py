@@ -423,6 +423,7 @@ class Machine:
 
                     if 'T' in parse_command:  # T code
                         self.active_toolhead = int(parse_command['T'])
+                        print('active toolhead changed to : ', self.active_toolhead)
 
                     if 'L' in parse_command:  # layer we found in gcode remove comment
                         backup_print = open('backup_print.bc', 'w')
@@ -443,29 +444,16 @@ class Machine:
 
                         elif parse_command['M'] == '109':  # for M109
                             print('found M-code')
-                            if 'T' in parse_command:
-                                if parse_command['T'] == 0:
-                                    print('found  T in M-code')
-                                    self.extruder_temp['point'] = int(
-                                        float(parse_command['S']))
-                                    self.append_gcode('M109 S%f T0' % (
-                                        self.extruder_temp['point']), 3)
-                                elif parse_command['T'] == 1:
-                                    self.extruder2_temp['point'] = int(
-                                        float(parse_command['S']))
-                                    self.append_gcode('M109 S%f T1' % (
-                                        self.extruder2_temp['point']), 3)
-                            else:
-                                if self.active_toolhead == 0:
-                                    self.extruder_temp['point'] = int(
-                                        float(parse_command['S']))
-                                    self.append_gcode('M109 S%f T0' % (
-                                        self.extruder_temp['point']), 3)
-                                elif self.active_toolhead == 1:
-                                    self.extruder2_temp['point'] = int(
-                                        float(parse_command['S']))
-                                    self.append_gcode('M109 S%f T1' % (
-                                        self.extruder2_temp['point']), 3)
+                            if self.active_toolhead == 0:
+                                self.extruder_temp['point'] = int(
+                                    float(parse_command['S']))
+                                self.append_gcode('M109 S%f T0' % (
+                                    self.extruder_temp['point']), 3)
+                            elif self.active_toolhead == 1:
+                                self.extruder2_temp['point'] = int(
+                                    float(parse_command['S']))
+                                self.append_gcode('M109 S%f T1' % (
+                                    self.extruder2_temp['point']), 3)
                             command = -1
 
                         elif parse_command['M'] == '106':  # for M106
