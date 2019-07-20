@@ -238,8 +238,10 @@ class Machine:
                         elif self.number_of_extruder == 1:
                             data = self.machine_serial.readline().decode('utf-8')
                             data = GCodeParser.remove_chomp(data)
+                            print('here in m109 reading started')
                             while data != 'ok':
                                 splited = data.split(' ')
+                                print(splited)
                                 self.extruder_temp['current'] = float(
                                     splited[0][2:])
                                 data = self.machine_serial.readline().decode('utf-8')
@@ -297,10 +299,13 @@ class Machine:
                 lines.append(gcode)
 
         ''' hibernate mode '''
+
+        
         if line_to_go != 0:
 
             '''                   first heat up the nozzles and bed                  '''
-
+            print('\n\n\nhibernate mode started:\n\n\n')
+            
             '''get the extruder temp from the gcode'''
             for line in lines:
                 parse_line = GCodeParser.parse(line)
@@ -330,7 +335,8 @@ class Machine:
                                     float(parse_line['S']))
                                 self.append_gcode('M109 S%f T1' % (
                                     self.extruder2_temp['point']), 3)
-
+                
+                print('\n\n\nactive toolhead: ',self.active_toolhead,' T1 :',self.extruder_temp['point'],' T2 :',self.extruder2_temp['point'],'\n\n\n')
                     # break ## search in all the gcode lines because the second nozzel could be in any line
 
             '''get the bed temp from the gcode'''
@@ -342,11 +348,11 @@ class Machine:
                         self.append_gcode('M190 S%f' %
                                           (self.bed_temp['point']), 2)
                     break
-
+            print('\n\n\nbed temp : ',self.bed_temp['point'],'\n\n\n')
             '''               second smart hibernate                          '''
             
             algorithm = pdb.get_key('smart_hibernate_algorithm')
-            
+            print ('smart hibernate started the algorithm is : ',algorithm)
             # TODO: SHB - the addresses must be dynamic 
             if algorithm == 'circular':
                 self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
