@@ -334,11 +334,15 @@ class Machine:
 
             '''               second smart hibernate                          '''
             
-            algorithm = pdb.get_key('smart_hibernate_algorithm')
-            print ('smart hibernate started the algorithm is : ',algorithm)
+
+            print('\n\n\nsmart hibernate started\n\n\n')
+            self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
+
+            # algorithm = pdb.get_key('smart_hibernate_algorithm')
+            # print ('smart hibernate started the algorithm is : ',algorithm)
             # TODO: SHB - the addresses must be dynamic 
             # if algorithm == 'circular':
-            #     self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
+                # self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
             # elif algorithm == 'linear':
             #     self.__read_file_gcode_lines('./smart_hibernate_algorithms/linear_pattern.gcode')
 
