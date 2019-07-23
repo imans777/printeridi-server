@@ -309,33 +309,21 @@ class Machine:
                 parse_line = GCodeParser.parse(line)
                 if 'T' in parse_line:
                     self.active_toolhead = int(parse_line['T'])
-                elif 'M' in parse_line:
+                if 'M' in parse_line:
                     if parse_line['M'] == '109':
-                        if 'T' in parse_line:
-                            if parse_line['T'] == 0:
-                                self.extruder_temp['point'] = int(
-                                    float(parse_line['S']))
-                                self.append_gcode('M109 S%f T0' % (
-                                    self.extruder_temp['point']), 3)
-                            elif parse_line['T'] == 1:
-                                self.extruder2_temp['point'] = int(
-                                    float(parse_line['S']))
-                                self.append_gcode('M109 S%f T1' % (
-                                    self.extruder2_temp['point']), 3)
-                        else:
-                            if self.active_toolhead == 0:
-                                self.extruder_temp['point'] = int(
-                                    float(parse_line['S']))
-                                self.append_gcode('M109 S%f T0' % (
-                                    self.extruder_temp['point']), 3)
-                            elif self.active_toolhead == 1:
-                                self.extruder2_temp['point'] = int(
-                                    float(parse_line['S']))
-                                self.append_gcode('M109 S%f T1' % (
-                                    self.extruder2_temp['point']), 3)
+                        if self.active_toolhead == 0:
+                            self.extruder_temp['point'] = int(
+                                float(parse_line['S']))
+                            self.append_gcode('M109 S%f T0' % (
+                                self.extruder_temp['point']), 3)
+                        elif self.active_toolhead == 1:
+                            self.extruder2_temp['point'] = int(
+                                float(parse_line['S']))
+                            self.append_gcode('M109 S%f T1' % (
+                                self.extruder2_temp['point']), 3)
                 
-                print('\n\n\nactive toolhead: ',self.active_toolhead,' T1 :',self.extruder_temp['point'],' T2 :',self.extruder2_temp['point'],'\n\n\n')
                     # break ## search in all the gcode lines because the second nozzel could be in any line
+            print('\n\n\nactive toolhead: ',self.active_toolhead,' T1 :',self.extruder_temp['point'],' T2 :',self.extruder2_temp['point'],'\n\n\n')
 
             '''get the bed temp from the gcode'''
             for line in lines:
@@ -346,16 +334,17 @@ class Machine:
                         self.append_gcode('M190 S%f' %
                                           (self.bed_temp['point']), 2)
                     break
+                    
             print('\n\n\nbed temp : ',self.bed_temp['point'],'\n\n\n')
             '''               second smart hibernate                          '''
             
             algorithm = pdb.get_key('smart_hibernate_algorithm')
             print ('smart hibernate started the algorithm is : ',algorithm)
             # TODO: SHB - the addresses must be dynamic 
-            if algorithm == 'circular':
-                self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
-            elif algorithm == 'linear':
-                self.__read_file_gcode_lines('./smart_hibernate_algorithms/linear_pattern.gcode')
+            # if algorithm == 'circular':
+            #     self.__read_file_gcode_lines('./smart_hibernate_algorithms/Circular_pattern.gcode')
+            # elif algorithm == 'linear':
+            #     self.__read_file_gcode_lines('./smart_hibernate_algorithms/linear_pattern.gcode')
 
             '''                     third homing                              '''
             self.append_gcode('G91')
