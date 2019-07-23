@@ -304,13 +304,14 @@ class Machine:
             '''                   first heat up the nozzles and bed                  '''
             print('\n\n\nhibernate mode started:\n\n\n')
             
-            '''get the extruder temp from the gcode'''
+            '''get the extruder and bed temp from the gcode'''
             for line in lines:
                 parse_line = GCodeParser.parse(line)
                 if 'T' in parse_line:
                     self.active_toolhead = int(parse_line['T'])
                 if 'M' in parse_line:
-                    if parse_line['M'] == '109':
+
+                    if parse_line['M'] == '109': # extruder
                         if self.active_toolhead == 0:
                             self.extruder_temp['point'] = int(
                                 float(parse_line['S']))
@@ -321,21 +322,16 @@ class Machine:
                                 float(parse_line['S']))
                             self.append_gcode('M109 S%f T1' % (
                                 self.extruder2_temp['point']), 3)
+                        
+                    if parse_line['M'] == '190': # bed
+                        self.bed_temp['point'] = int(float(parse_line['S']))
+                        self.append_gcode('M190 S%f' %
+                                        (self.bed_temp['point']), 2)
                 
                     # break ## search in all the gcode lines because the second nozzel could be in any line
             print('\n\n\nactive toolhead: ',self.active_toolhead,' T1 :',self.extruder_temp['point'],' T2 :',self.extruder2_temp['point'],'\n\n\n')
-
-            '''get the bed temp from the gcode'''
-            for line in lines:
-                parse_line = GCodeParser.parse(line)
-                if 'M' in parse_line:
-                    if parse_line['M'] == '190':
-                        self.bed_temp['point'] = int(float(parse_line['S']))
-                        self.append_gcode('M190 S%f' %
-                                          (self.bed_temp['point']), 2)
-                    break
-                    
             print('\n\n\nbed temp : ',self.bed_temp['point'],'\n\n\n')
+
             '''               second smart hibernate                          '''
             
             algorithm = pdb.get_key('smart_hibernate_algorithm')
